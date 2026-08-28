@@ -1,0 +1,6 @@
+{
+  "name": "SmartQueue AI",
+  "description": "AI-powered digital token and queue management system with live wait tracking, admin controls, and dynamic queue intelligence.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
