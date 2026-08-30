@@ -97,3 +97,11 @@ Service Completed / Skipped
    │
    ▼
 Analytics Updated
+---
+
+
+## 📸 Screenshots
+
+Screenshots of the SmartQueue AI application will be added here.
+
+---
