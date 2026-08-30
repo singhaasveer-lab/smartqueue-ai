@@ -101,7 +101,31 @@ Analytics Updated
 
 
 ## 📸 Screenshots
+## 📸 Screenshots
 
-Screenshots of the SmartQueue AI application will be added here.
+### 🏠 Overview
+
+![SmartQueue Overview](docs/screenshots/Screenshot%202026-08-30%20144842.png)
+
+### 📺 Live Queue
+
+![SmartQueue Live Queue](docs/screenshots/Screenshot%202026-08-30%20144849.png)
+
+### 🏢 Admin Dashboard
+
+![SmartQueue Admin Dashboard](docs/screenshots/Screenshot%202026-08-30%20144855.png)
+
+### 🤖 AI Insights
+
+![SmartQueue AI Insights](docs/screenshots/Screenshot%202026-08-30%20144901.png)
+
+### 📊 Analytics
+
+![SmartQueue Analytics](docs/screenshots/Screenshot%202026-08-30%20144908.png)
+
+### 🌗 Theme / Responsive View
+
+![SmartQueue Theme](docs/screenshots/Screenshot%202026-08-30%20144915.png)
+
 
 ---
