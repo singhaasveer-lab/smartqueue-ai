@@ -1,32 +1,20 @@
 import React, { useState } from 'react';
 import { useQueue } from '../context/QueueContext';
-import { PriorityLevel, ServiceId, TokenStatus } from '../types';
+import { PriorityLevel, ServiceId } from '../types';
 import {
-  LayoutDashboard,
   Users,
   Clock,
   CheckCircle2,
-  AlertTriangle,
   Play,
   RotateCcw,
   Plus,
   Search,
-  Filter,
   Zap,
-  Phone,
-  FileText,
-  UserCheck,
   UserX,
   Volume2,
-  Sparkles,
-  ArrowRight,
-  MoreHorizontal,
-  ChevronDown,
-  Layers,
   Building2,
-  Trash2,
+  X,
 } from 'lucide-react';
-import { soundManager } from '../utils/sound';
 
 export const AdminDashboard: React.FC = () => {
   const {
@@ -35,7 +23,6 @@ export const AdminDashboard: React.FC = () => {
     services,
     analytics,
     callNext,
-    startServing,
     completeCurrent,
     skipToken,
     recallToken,
@@ -43,72 +30,152 @@ export const AdminDashboard: React.FC = () => {
     toggleCounterStatus,
     addCounter,
     resetToDemoData,
-    clearAllData,
     fastAddDemoCustomer,
     joinQueue,
     addToast,
   } = useQueue();
 
-  // Filters & Search
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedTab, setSelectedTab] = useState<'all' | 'waiting' | 'serving' | 'priority' | 'completed' | 'skipped'>('waiting');
+  const [selectedTab, setSelectedTab] = useState<
+    'all' | 'waiting' | 'serving' | 'priority' | 'completed' | 'skipped'
+  >('waiting');
+
   const [selectedService, setSelectedService] = useState<string>('all');
   const [selectedCounterId, setSelectedCounterId] = useState<number>(1);
 
-  // Walk-in modal
   const [showAddWalkin, setShowAddWalkin] = useState(false);
   const [walkinName, setWalkinName] = useState('');
-  const [walkinService, setWalkinService] = useState<ServiceId>('general_enquiry');
-  const [walkinPriority, setWalkinPriority] = useState<PriorityLevel>('normal');
+  const [walkinService, setWalkinService] =
+    useState<ServiceId>('general_enquiry');
+  const [walkinPriority, setWalkinPriority] =
+    useState<PriorityLevel>('normal');
   const [walkinPhone, setWalkinPhone] = useState('');
   const [walkinNotes, setWalkinNotes] = useState('');
 
-  // Add counter modal
   const [showAddCounterModal, setShowAddCounterModal] = useState(false);
   const [newCounterName, setNewCounterName] = useState('');
   const [newStaffName, setNewStaffName] = useState('');
 
-  // Active serving tokens
-  const servingTokens = tokens.filter((t) => t.status === 'serving' || t.status === 'called');
-  const waitingTokens = tokens.filter((t) => t.status === 'waiting');
+  const servingTokens = tokens.filter(
+    (token) =>
+      token.status === 'serving' || token.status === 'called'
+  );
 
-  // Filtered Queue List
-  const filteredTokens = tokens.filter((token) => {
-    // Tab filter
-    if (selectedTab === 'waiting' && token.status !== 'waiting') return false;
-    if (selectedTab === 'serving' && token.status !== 'serving' && token.status !== 'called') return false;
-    if (selectedTab === 'priority' && token.priority !== 'priority') return false;
-    if (selectedTab === 'completed' && token.status !== 'completed') return false;
-    if (selectedTab === 'skipped' && token.status !== 'skipped') return false;
+  const waitingTokens = tokens.filter(
+    (token) => token.status === 'waiting'
+  );
 
-    // Service filter
-    if (selectedService !== 'all' && token.serviceId !== selectedService) return false;
-
-    // Search query
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      const matchName = token.customerName.toLowerCase().includes(q);
-      const matchToken = token.tokenNumber.toLowerCase().includes(q);
-      const matchPhone = token.customerPhone?.toLowerCase().includes(q);
-      if (!matchName && !matchToken && !matchPhone) return false;
-    }
-
-    return true;
-  }).sort((a, b) => {
-    if (selectedTab === 'waiting' || selectedTab === 'all') {
-      if (a.status === 'waiting' && b.status === 'waiting') {
-        if (a.priority === 'priority' && b.priority !== 'priority') return -1;
-        if (a.priority !== 'priority' && b.priority === 'priority') return 1;
-        return a.joinedAt - b.joinedAt;
+  const filteredTokens = tokens
+    .filter((token) => {
+      if (
+        selectedTab === 'waiting' &&
+        token.status !== 'waiting'
+      ) {
+        return false;
       }
-    }
-    return (b.calledAt || b.joinedAt) - (a.calledAt || a.joinedAt);
-  });
 
-  const handleWalkinSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+      if (
+        selectedTab === 'serving' &&
+        token.status !== 'serving' &&
+        token.status !== 'called'
+      ) {
+        return false;
+      }
+
+      if (
+        selectedTab === 'priority' &&
+        token.priority !== 'priority'
+      ) {
+        return false;
+      }
+
+      if (
+        selectedTab === 'completed' &&
+        token.status !== 'completed'
+      ) {
+        return false;
+      }
+
+      if (
+        selectedTab === 'skipped' &&
+        token.status !== 'skipped'
+      ) {
+        return false;
+      }
+
+      if (
+        selectedService !== 'all' &&
+        token.serviceId !== selectedService
+      ) {
+        return false;
+      }
+
+      if (searchQuery.trim()) {
+        const query = searchQuery.toLowerCase();
+
+        const matchName = token.customerName
+          .toLowerCase()
+          .includes(query);
+
+        const matchToken = token.tokenNumber
+          .toLowerCase()
+          .includes(query);
+
+        const matchPhone = token.customerPhone
+          ?.toLowerCase()
+          .includes(query);
+
+        if (!matchName && !matchToken && !matchPhone) {
+          return false;
+        }
+      }
+
+      return true;
+    })
+    .sort((a, b) => {
+      if (
+        selectedTab === 'waiting' ||
+        selectedTab === 'all'
+      ) {
+        if (
+          a.status === 'waiting' &&
+          b.status === 'waiting'
+        ) {
+          if (
+            a.priority === 'priority' &&
+            b.priority !== 'priority'
+          ) {
+            return -1;
+          }
+
+          if (
+            a.priority !== 'priority' &&
+            b.priority === 'priority'
+          ) {
+            return 1;
+          }
+
+          return a.joinedAt - b.joinedAt;
+        }
+      }
+
+      return (
+        (b.calledAt || b.joinedAt) -
+        (a.calledAt || a.joinedAt)
+      );
+    });
+
+  const handleWalkinSubmit = (
+    event: React.FormEvent
+  ) => {
+    event.preventDefault();
+
     if (!walkinName.trim()) {
-      addToast('Name Required', 'Please enter customer name.', 'warning');
+      addToast(
+        'Name Required',
+        'Please enter customer name.',
+        'warning'
+      );
       return;
     }
 
@@ -123,601 +190,921 @@ export const AdminDashboard: React.FC = () => {
     setWalkinName('');
     setWalkinPhone('');
     setWalkinNotes('');
+    setWalkinPriority('normal');
+    setWalkinService('general_enquiry');
     setShowAddWalkin(false);
-    addToast('Walk-in Registered', 'Added to queue list.', 'success');
+
+    addToast(
+      'Walk-in Registered',
+      'Added to queue list.',
+      'success'
+    );
   };
 
-  const handleCreateCounter = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newCounterName.trim()) return;
-    addCounter(newCounterName, newStaffName || 'Staff Member');
+  const handleCreateCounter = (
+    event: React.FormEvent
+  ) => {
+    event.preventDefault();
+
+    if (!newCounterName.trim()) {
+      return;
+    }
+
+    addCounter(
+      newCounterName.trim(),
+      newStaffName.trim() || 'Staff Member'
+    );
+
     setNewCounterName('');
     setNewStaffName('');
     setShowAddCounterModal(false);
+
+    addToast(
+      'Counter Added',
+      'New service station is ready.',
+      'success'
+    );
   };
 
+  const tabItems = [
+    {
+      id: 'waiting',
+      label: 'Waiting Line',
+      count: waitingTokens.length,
+    },
+    {
+      id: 'serving',
+      label: 'In Service',
+      count: servingTokens.length,
+    },
+    {
+      id: 'priority',
+      label: 'Priority VIP',
+      count: tokens.filter(
+        (token) => token.priority === 'priority'
+      ).length,
+    },
+    {
+      id: 'all',
+      label: 'All Records',
+      count: tokens.length,
+    },
+    {
+      id: 'completed',
+      label: 'Completed',
+      count: tokens.filter(
+        (token) => token.status === 'completed'
+      ).length,
+    },
+    {
+      id: 'skipped',
+      label: 'Skipped',
+      count: tokens.filter(
+        (token) => token.status === 'skipped'
+      ).length,
+    },
+  ];
+
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
-      {/* Header & Quick Action Row */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-              Admin & Staff Dispatch Desk
-            </h1>
-            <span className="text-xs px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-bold uppercase">
-              Control Center
-            </span>
-          </div>
-          <p className="text-xs text-slate-400 mt-1">
-            Manage live multi-counter queues, dispatch next attendees, and trigger token notifications.
-          </p>
-        </div>
+    <div className="w-full min-w-0 overflow-x-hidden">
+      <div className="mx-auto w-full max-w-7xl min-w-0 px-3 py-5 sm:px-5 sm:py-7 lg:px-6 lg:py-8">
 
-        <div className="flex flex-wrap items-center gap-2.5">
-          <button
-            id="admin-add-walkin-btn"
-            onClick={() => setShowAddWalkin(true)}
-            className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
-          >
-            <Plus className="w-4 h-4 text-cyan-400" />
-            <span>Add Walk-in</span>
-          </button>
+        {/* =====================================================
+            HEADER
+        ====================================================== */}
+        <div className="mb-6 overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--card)] shadow-xl">
+          <div className="bg-gradient-to-r from-[#163a5f] via-[#163a5f] to-[#315b87] dark:from-[#0d213a] dark:via-[#0d213a] dark:to-[#173b5d] px-5 py-6 text-white sm:px-7">
+            <div className="flex min-w-0 flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
 
-          <button
-            id="admin-fast-demo-btn"
-            onClick={() => fastAddDemoCustomer(false)}
-            className="px-3.5 py-2 rounded-xl bg-indigo-600/30 hover:bg-indigo-600/50 border border-indigo-500/40 text-indigo-200 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
-            title="Inject simulated customer into queue"
-          >
-            <Users className="w-4 h-4 text-indigo-400" />
-            <span>+ Sim Visitor</span>
-          </button>
-
-          <button
-            id="admin-fast-prio-btn"
-            onClick={() => fastAddDemoCustomer(true)}
-            className="px-3.5 py-2 rounded-xl bg-amber-600/30 hover:bg-amber-600/50 border border-amber-500/40 text-amber-200 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
-            title="Inject priority visitor"
-          >
-            <Zap className="w-4 h-4 text-amber-400" />
-            <span>+ Sim VIP</span>
-          </button>
-
-          <button
-            onClick={resetToDemoData}
-            className="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 hover:text-amber-300 text-xs font-medium transition-all flex items-center gap-1 cursor-pointer"
-            title="Reset to Demo State"
-          >
-            <RotateCcw className="w-3.5 h-3.5" />
-            <span>Reset Demo</span>
-          </button>
-        </div>
-      </div>
-
-      {/* KPI Cards Strip */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-lg space-y-1">
-          <div className="flex items-center justify-between text-slate-400 text-xs">
-            <span className="font-semibold uppercase tracking-wider">Total Waiting</span>
-            <Users className="w-4 h-4 text-indigo-400" />
-          </div>
-          <p className="text-3xl font-black font-mono text-white">{analytics.totalWaiting}</p>
-          <p className="text-[11px] text-slate-400">
-            <strong className="text-amber-400">{analytics.priorityCount}</strong> priority ticket{analytics.priorityCount === 1 ? '' : 's'}
-          </p>
-        </div>
-
-        <div className="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-lg space-y-1">
-          <div className="flex items-center justify-between text-slate-400 text-xs">
-            <span className="font-semibold uppercase tracking-wider">Currently Serving</span>
-            <Play className="w-4 h-4 text-emerald-400" />
-          </div>
-          <p className="text-3xl font-black font-mono text-emerald-400">{analytics.totalServing}</p>
-          <p className="text-[11px] text-slate-400">
-            Across {counters.filter((c) => c.status !== 'closed').length} active desk stations
-          </p>
-        </div>
-
-        <div className="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-lg space-y-1">
-          <div className="flex items-center justify-between text-slate-400 text-xs">
-            <span className="font-semibold uppercase tracking-wider">Avg Waiting Time</span>
-            <Clock className="w-4 h-4 text-cyan-400" />
-          </div>
-          <p className="text-3xl font-black font-mono text-cyan-400">{analytics.avgWaitTimeMinutes}m</p>
-          <p className="text-[11px] text-slate-400">
-            Estimated clear: ~{analytics.estimatedTimeToClearMinutes} mins
-          </p>
-        </div>
-
-        <div className="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-lg space-y-1">
-          <div className="flex items-center justify-between text-slate-400 text-xs">
-            <span className="font-semibold uppercase tracking-wider">Served Today</span>
-            <CheckCircle2 className="w-4 h-4 text-purple-400" />
-          </div>
-          <p className="text-3xl font-black font-mono text-purple-300">{analytics.totalServedToday}</p>
-          <p className="text-[11px] text-slate-400">
-            {analytics.totalSkipped} skipped / no-show
-          </p>
-        </div>
-      </div>
-
-      {/* Counter Operator Stations & Quick Call Deck */}
-      <div className="p-6 rounded-3xl bg-gradient-to-b from-slate-900 to-slate-950 border border-slate-800 shadow-xl space-y-5">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
-          <div>
-            <h2 className="text-base font-bold text-white flex items-center gap-2">
-              <Building2 className="w-4 h-4 text-cyan-400" />
-              <span>Counter Station Controllers</span>
-            </h2>
-            <p className="text-xs text-slate-400">Directly dispatch tokens to specific desk operators</p>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <button
-              id="admin-call-next-global-btn"
-              onClick={() => callNext(selectedCounterId)}
-              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold text-xs shadow-lg shadow-emerald-600/30 transition-all flex items-center gap-2 cursor-pointer"
-            >
-              <Volume2 className="w-4 h-4" />
-              <span>Call Next to Selected Desk</span>
-            </button>
-
-            <button
-              onClick={() => setShowAddCounterModal(true)}
-              className="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold border border-slate-700 transition-all cursor-pointer"
-            >
-              + Add Desk
-            </button>
-          </div>
-        </div>
-
-        {/* Counter Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {counters.map((counter) => {
-            const servingToken = tokens.find((t) => t.id === counter.currentServingTokenId);
-            const isSelected = selectedCounterId === counter.id;
-
-            return (
-              <div
-                key={counter.id}
-                onClick={() => setSelectedCounterId(counter.id)}
-                className={`p-5 rounded-2xl border transition-all cursor-pointer space-y-4 ${
-                  counter.status === 'closed'
-                    ? 'bg-slate-950/50 border-slate-800 opacity-60'
-                    : isSelected
-                    ? 'bg-indigo-950/40 border-indigo-500 ring-2 ring-indigo-500/30 shadow-lg'
-                    : 'bg-slate-900/80 border-slate-800 hover:border-slate-700'
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className={`w-2.5 h-2.5 rounded-full ${isSelected ? 'bg-indigo-400 animate-ping' : 'bg-slate-500'}`} />
-                    <span className="font-bold text-sm text-white">{counter.name}</span>
+              <div className="min-w-0">
+                <div className="mb-2 flex min-w-0 flex-wrap items-center gap-2.5">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white/10 backdrop-blur-sm">
+                    <Building2 className="h-5 w-5 text-[var(--accent)]" />
                   </div>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleCounterStatus(counter.id);
-                    }}
-                    className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase transition-all ${
-                      counter.status === 'closed'
-                        ? 'bg-slate-800 text-slate-400 hover:bg-slate-700'
-                        : 'bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30'
-                    }`}
-                  >
-                    {counter.status === 'closed' ? 'Closed (Click to Open)' : 'Open'}
-                  </button>
+
+                  <h1 className="truncate text-xl font-black tracking-tight sm:text-2xl lg:text-3xl">
+                    Admin & Staff Dispatch Desk
+                  </h1>
+
+                  <span className="shrink-0 rounded-full border border-white/20 bg-white/10 px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-blue-100">
+                    Control Center
+                  </span>
                 </div>
 
-                {/* Serving Status */}
-                {servingToken ? (
-                  <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <span className="text-[10px] uppercase font-bold text-slate-400">Current Token</span>
-                        <p className="text-xl font-black font-mono text-white mt-0.5">{servingToken.tokenNumber}</p>
-                      </div>
-                      <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase font-mono">
-                        {servingToken.status}
+                <p className="max-w-2xl text-xs leading-relaxed text-blue-100/80 sm:text-sm">
+                  Manage live multi-counter queues, dispatch the next
+                  attendees, and trigger token notifications from one
+                  central control panel.
+                </p>
+              </div>
+
+              {/* QUICK ACTIONS */}
+              <div className="flex min-w-0 flex-wrap gap-2">
+                <button
+                  id="admin-add-walkin-btn"
+                  onClick={() => setShowAddWalkin(true)}
+                  className="flex shrink-0 items-center gap-1.5 rounded-xl border border-white/15 bg-white/10 px-3.5 py-2.5 text-xs font-bold text-white backdrop-blur-sm transition-all hover:bg-white/20"
+                >
+                  <Plus className="h-4 w-4 text-blue-200" />
+                  Add Walk-in
+                </button>
+
+                <button
+                  id="admin-fast-demo-btn"
+                  onClick={() => fastAddDemoCustomer(false)}
+                  className="flex shrink-0 items-center gap-1.5 rounded-xl border border-cyan-300/20 bg-cyan-400/10 px-3.5 py-2.5 text-xs font-bold text-cyan-100 transition-all hover:bg-cyan-400/20"
+                  title="Inject simulated customer into queue"
+                >
+                  <Users className="h-4 w-4" />
+                  + Sim Visitor
+                </button>
+
+                <button
+                  id="admin-fast-prio-btn"
+                  onClick={() => fastAddDemoCustomer(true)}
+                  className="flex shrink-0 items-center gap-1.5 rounded-xl border border-amber-300/20 bg-amber-400/10 px-3.5 py-2.5 text-xs font-bold text-amber-100 transition-all hover:bg-amber-400/20"
+                  title="Inject priority visitor"
+                >
+                  <Zap className="h-4 w-4" />
+                  + Sim VIP
+                </button>
+
+                <button
+                  onClick={resetToDemoData}
+                  className="flex shrink-0 items-center gap-1 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-xs font-semibold text-blue-100/70 transition-all hover:bg-white/10 hover:text-white"
+                  title="Reset to Demo State"
+                >
+                  <RotateCcw className="h-3.5 w-3.5" />
+                  Reset Demo
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* =====================================================
+            KPI CARDS
+        ====================================================== */}
+        <div className="mb-6 grid min-w-0 grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
+
+          <div className="min-w-0 rounded-2xl border border-[var(--border)] bg-[var(--card)] p-4 shadow-md sm:p-5">
+            <div className="flex items-center justify-between gap-2 text-[var(--muted)]">
+              <span className="truncate text-[10px] font-bold uppercase tracking-wider sm:text-xs">
+                Total Waiting
+              </span>
+              <Users className="h-4 w-4 shrink-0 text-blue-500" />
+            </div>
+
+            <p className="mt-2 font-mono text-2xl font-black text-[var(--foreground)] sm:text-3xl">
+              {analytics.totalWaiting}
+            </p>
+
+            <p className="mt-1 truncate text-[10px] text-[var(--muted)] sm:text-[11px]">
+              <strong className="text-amber-500">
+                {analytics.priorityCount}
+              </strong>{' '}
+              priority ticket
+              {analytics.priorityCount === 1 ? '' : 's'}
+            </p>
+          </div>
+
+          <div className="min-w-0 rounded-2xl border border-[var(--border)] bg-[var(--card)] p-4 shadow-md sm:p-5">
+            <div className="flex items-center justify-between gap-2 text-[var(--muted)]">
+              <span className="truncate text-[10px] font-bold uppercase tracking-wider sm:text-xs">
+                Currently Serving
+              </span>
+              <Play className="h-4 w-4 shrink-0 text-emerald-500" />
+            </div>
+
+            <p className="mt-2 font-mono text-2xl font-black text-emerald-500 sm:text-3xl">
+              {analytics.totalServing}
+            </p>
+
+            <p className="mt-1 truncate text-[10px] text-[var(--muted)] sm:text-[11px]">
+              Across{' '}
+              {
+                counters.filter(
+                  (counter) => counter.status !== 'closed'
+                ).length
+              }{' '}
+              active desk stations
+            </p>
+          </div>
+
+          <div className="min-w-0 rounded-2xl border border-[var(--border)] bg-[var(--card)] p-4 shadow-md sm:p-5">
+            <div className="flex items-center justify-between gap-2 text-[var(--muted)]">
+              <span className="truncate text-[10px] font-bold uppercase tracking-wider sm:text-xs">
+                Avg Waiting Time
+              </span>
+              <Clock className="h-4 w-4 shrink-0 text-cyan-500" />
+            </div>
+
+            <p className="mt-2 font-mono text-2xl font-black text-cyan-500 sm:text-3xl">
+              {analytics.avgWaitTimeMinutes}m
+            </p>
+
+            <p className="mt-1 truncate text-[10px] text-[var(--muted)] sm:text-[11px]">
+              Estimated clear: ~
+              {analytics.estimatedTimeToClearMinutes} mins
+            </p>
+          </div>
+
+          <div className="min-w-0 rounded-2xl border border-[var(--border)] bg-[var(--card)] p-4 shadow-md sm:p-5">
+            <div className="flex items-center justify-between gap-2 text-[var(--muted)]">
+              <span className="truncate text-[10px] font-bold uppercase tracking-wider sm:text-xs">
+                Served Today
+              </span>
+              <CheckCircle2 className="h-4 w-4 shrink-0 text-purple-500" />
+            </div>
+
+            <p className="mt-2 font-mono text-2xl font-black text-purple-500 sm:text-3xl">
+              {analytics.totalServedToday}
+            </p>
+
+            <p className="mt-1 truncate text-[10px] text-[var(--muted)] sm:text-[11px]">
+              {analytics.totalSkipped} skipped / no-show
+            </p>
+          </div>
+        </div>
+
+        {/* =====================================================
+            COUNTER STATIONS
+        ====================================================== */}
+        <section className="mb-6 min-w-0 rounded-3xl border border-[var(--border)] bg-[var(--card)] p-4 shadow-xl sm:p-6">
+
+          <div className="mb-5 flex min-w-0 flex-col gap-4 border-b border-[var(--border)] pb-5 lg:flex-row lg:items-center lg:justify-between">
+
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <Building2 className="h-5 w-5 shrink-0 text-blue-500" />
+
+                <h2 className="truncate text-base font-black text-[var(--foreground)] sm:text-lg">
+                  Counter Station Controllers
+                </h2>
+              </div>
+
+              <p className="mt-1 text-xs text-[var(--muted)]">
+                Directly dispatch tokens to specific desk operators.
+              </p>
+            </div>
+
+            <div className="flex min-w-0 flex-wrap gap-2">
+              <button
+                id="admin-call-next-global-btn"
+                onClick={() => callNext(selectedCounterId)}
+                className="flex min-w-0 flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-2.5 text-xs font-extrabold text-white shadow-lg transition-all hover:from-blue-500 hover:to-indigo-500 sm:flex-none"
+              >
+                <Volume2 className="h-4 w-4 shrink-0" />
+                <span className="truncate">
+                  Call Next to Selected Desk
+                </span>
+              </button>
+
+              <button
+                onClick={() => setShowAddCounterModal(true)}
+                className="flex shrink-0 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--card-soft)] px-4 py-2.5 text-xs font-bold text-[var(--foreground)] transition-all hover:opacity-80"
+              >
+                <Plus className="mr-1 h-3.5 w-3.5" />
+                Add Desk
+              </button>
+            </div>
+          </div>
+
+          <div className="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {counters.map((counter) => {
+              const servingToken = tokens.find(
+                (token) =>
+                  token.id === counter.currentServingTokenId
+              );
+
+              const isSelected =
+                selectedCounterId === counter.id;
+
+              return (
+                <div
+                  key={counter.id}
+                  onClick={() =>
+                    setSelectedCounterId(counter.id)
+                  }
+                  className={`
+                    min-w-0 overflow-hidden rounded-2xl border p-4 transition-all sm:p-5
+                    ${
+                      counter.status === 'closed'
+                        ? 'border-[var(--border)] bg-[var(--card-soft)] opacity-60'
+                        : isSelected
+                        ? 'border-blue-500 bg-blue-500/10 shadow-lg ring-2 ring-blue-500/20'
+                        : 'border-[var(--border)] bg-[var(--card)] hover:border-blue-400 hover:shadow-md'
+                    }
+                  `}
+                >
+                  <div className="flex min-w-0 items-center justify-between gap-3">
+                    <div className="flex min-w-0 items-center gap-2">
+                      <span
+                        className={`h-2.5 w-2.5 shrink-0 rounded-full ${
+                          counter.status === 'closed'
+                            ? 'bg-slate-400'
+                            : isSelected
+                            ? 'animate-pulse bg-blue-500'
+                            : 'bg-emerald-500'
+                        }`}
+                      />
+
+                      <span className="truncate text-sm font-black text-[var(--foreground)]">
+                        {counter.name}
                       </span>
                     </div>
 
-                    <div className="text-xs text-slate-300">
-                      <p className="font-semibold text-white">{servingToken.customerName}</p>
-                      <p className="text-[11px] text-slate-400">{servingToken.serviceName}</p>
-                    </div>
-
-                    {/* Quick Operator Actions */}
-                    <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-800">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          completeCurrent(servingToken.id);
-                        }}
-                        className="py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] transition-all flex items-center justify-center gap-1"
-                      >
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                        <span>Complete</span>
-                      </button>
-
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          skipToken(servingToken.id);
-                        }}
-                        className="py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold text-[11px] transition-all flex items-center justify-center gap-1"
-                      >
-                        <UserX className="w-3.5 h-3.5" />
-                        <span>Skip (No Show)</span>
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="p-4 rounded-xl bg-slate-950/60 border border-dashed border-slate-800 text-center space-y-2">
-                    <p className="text-xs text-slate-500 italic">No attendee assigned</p>
                     <button
-                      disabled={counter.status === 'closed'}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        callNext(counter.id);
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        toggleCounterStatus(counter.id);
                       }}
-                      className="w-full py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md transition-all flex items-center justify-center gap-1.5 disabled:opacity-40"
+                      className={`
+                        shrink-0 rounded-full px-2.5 py-1 text-[9px] font-black uppercase tracking-wide transition-all
+                        ${
+                          counter.status === 'closed'
+                            ? 'bg-slate-500/10 text-[var(--muted)] hover:bg-slate-500/20'
+                            : 'bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 dark:text-emerald-300'
+                        }
+                      `}
                     >
-                      <Volume2 className="w-3.5 h-3.5" />
-                      <span>Call Next Token</span>
+                      {counter.status === 'closed'
+                        ? 'Closed'
+                        : 'Open'}
                     </button>
                   </div>
-                )}
 
-                <p className="text-[11px] text-slate-400">Operator: {counter.staffName}</p>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+                  {servingToken ? (
+                    <div className="mt-4 min-w-0 rounded-xl border border-[var(--border)] bg-[var(--card-soft)] p-3">
 
-      {/* Comprehensive Queue Table & Filters */}
-      <div className="p-6 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-xl space-y-6">
-        {/* Table Controls (Search, Tabs & Category Filter) */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          {/* Tab buttons */}
-          <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800 overflow-x-auto scrollbar-thin">
-            {[
-              { id: 'waiting', label: 'Waiting Line', count: waitingTokens.length },
-              { id: 'serving', label: 'In Service', count: servingTokens.length },
-              { id: 'priority', label: 'Priority VIP', count: tokens.filter((t) => t.priority === 'priority').length },
-              { id: 'all', label: 'All Records', count: tokens.length },
-              { id: 'completed', label: 'Completed', count: tokens.filter((t) => t.status === 'completed').length },
-              { id: 'skipped', label: 'Skipped', count: tokens.filter((t) => t.status === 'skipped').length },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                id={`admin-tab-${tab.id}`}
-                onClick={() => setSelectedTab(tab.id as any)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold tracking-wide whitespace-nowrap transition-all flex items-center gap-1.5 ${
-                  selectedTab === tab.id
-                    ? 'bg-indigo-600 text-white shadow-md'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-850'
-                }`}
-              >
-                <span>{tab.label}</span>
-                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold ${selectedTab === tab.id ? 'bg-indigo-900 text-white' : 'bg-slate-800 text-slate-400'}`}>
-                  {tab.count}
-                </span>
-              </button>
-            ))}
+                      <div className="flex min-w-0 items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <span className="text-[9px] font-black uppercase tracking-widest text-[var(--muted)]">
+                            Current Token
+                          </span>
+
+                          <p className="mt-0.5 truncate font-mono text-2xl font-black text-[var(--foreground)]">
+                            {servingToken.tokenNumber}
+                          </p>
+                        </div>
+
+                        <span className="shrink-0 rounded-full bg-emerald-500/10 px-2 py-1 text-[9px] font-bold uppercase text-emerald-600 dark:text-emerald-300">
+                          {servingToken.status}
+                        </span>
+                      </div>
+
+                      <div className="mt-3 min-w-0">
+                        <p className="truncate text-xs font-bold text-[var(--foreground)]">
+                          {servingToken.customerName}
+                        </p>
+
+                        <p className="mt-0.5 truncate text-[10px] text-[var(--muted)]">
+                          {servingToken.serviceName}
+                        </p>
+                      </div>
+
+                      <div className="mt-3 grid grid-cols-2 gap-2 border-t border-[var(--border)] pt-3">
+                        <button
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            completeCurrent(servingToken.id);
+                          }}
+                          className="flex items-center justify-center gap-1 rounded-lg bg-emerald-600 py-2 text-[10px] font-bold text-white transition-all hover:bg-emerald-500"
+                        >
+                          <CheckCircle2 className="h-3.5 w-3.5" />
+                          Complete
+                        </button>
+
+                        <button
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            skipToken(servingToken.id);
+                          }}
+                          className="flex items-center justify-center gap-1 rounded-lg border border-[var(--border)] bg-[var(--card)] py-2 text-[10px] font-bold text-amber-600 transition-all hover:bg-amber-500/10 dark:text-amber-300"
+                        >
+                          <UserX className="h-3.5 w-3.5" />
+                          Skip
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="mt-4 rounded-xl border border-dashed border-[var(--border)] bg-[var(--card-soft)] p-4 text-center">
+                      <p className="text-xs italic text-[var(--muted)]">
+                        No attendee assigned
+                      </p>
+
+                      <button
+                        disabled={counter.status === 'closed'}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          callNext(counter.id);
+                        }}
+                        className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl bg-blue-600 py-2.5 text-xs font-bold text-white shadow-md transition-all hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-40"
+                      >
+                        <Volume2 className="h-3.5 w-3.5" />
+                        Call Next Token
+                      </button>
+                    </div>
+                  )}
+
+                  <p className="mt-3 truncate text-[10px] text-[var(--muted)]">
+                    Operator: {counter.staffName}
+                  </p>
+                </div>
+              );
+            })}
           </div>
+        </section>
 
-          {/* Search & Service Filter */}
-          <div className="flex items-center gap-2">
-            <div className="relative w-full sm:w-56">
-              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                placeholder="Search token / name..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-8 pr-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-              />
+        {/* =====================================================
+            QUEUE MANAGEMENT
+        ====================================================== */}
+        <section className="min-w-0 rounded-3xl border border-[var(--border)] bg-[var(--card)] p-4 shadow-xl sm:p-6">
+
+          <div className="mb-5 flex min-w-0 flex-col gap-4 border-b border-[var(--border)] pb-5 xl:flex-row xl:items-center xl:justify-between">
+
+            {/* TABS */}
+            <div className="min-w-0 max-w-full overflow-x-auto rounded-xl border border-[var(--border)] bg-[var(--card-soft)] p-1">
+              <div className="flex w-max items-center gap-1">
+                {tabItems.map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() =>
+                      setSelectedTab(
+                        tab.id as
+                          | 'all'
+                          | 'waiting'
+                          | 'serving'
+                          | 'priority'
+                          | 'completed'
+                          | 'skipped'
+                      )
+                    }
+                    className={`
+                      flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-[10px] font-bold transition-all sm:text-xs
+                      ${
+                        selectedTab === tab.id
+                          ? 'bg-blue-600 text-white shadow-md'
+                          : 'text-[var(--muted)] hover:bg-[var(--card)] hover:text-[var(--foreground)]'
+                      }
+                    `}
+                  >
+                    <span>{tab.label}</span>
+
+                    <span
+                      className={`
+                        rounded-full px-1.5 py-0.5 font-mono text-[9px]
+                        ${
+                          selectedTab === tab.id
+                            ? 'bg-white/20 text-white'
+                            : 'bg-[var(--card)] text-[var(--muted)]'
+                        }
+                      `}
+                    >
+                      {tab.count}
+                    </span>
+                  </button>
+                ))}
+              </div>
             </div>
 
-            <select
-              value={selectedService}
-              onChange={(e) => setSelectedService(e.target.value)}
-              className="px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-300 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-            >
-              <option value="all">All Services</option>
-              {services.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name}
-                </option>
-              ))}
-            </select>
+            {/* SEARCH + SERVICE FILTER */}
+            <div className="flex min-w-0 flex-col gap-2 sm:flex-row">
+              <div className="relative min-w-0 flex-1 sm:w-56 sm:flex-none">
+                <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--muted)]" />
+
+                <input
+                  type="text"
+                  placeholder="Search token / name..."
+                  value={searchQuery}
+                  onChange={(event) =>
+                    setSearchQuery(event.target.value)
+                  }
+                  className="w-full rounded-xl border border-[var(--border)] bg-[var(--card-soft)] py-2 pl-8 pr-3 text-xs text-[var(--foreground)] placeholder:text-[var(--muted)] focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+                />
+              </div>
+
+              <select
+                value={selectedService}
+                onChange={(event) =>
+                  setSelectedService(event.target.value)
+                }
+                className="min-w-0 rounded-xl border border-[var(--border)] bg-[var(--card-soft)] px-3 py-2 text-xs text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+              >
+                <option value="all">All Services</option>
+
+                {services.map((service) => (
+                  <option
+                    key={service.id}
+                    value={service.id}
+                  >
+                    {service.name}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
-        </div>
 
-        {/* The Queue Table */}
-        <div className="overflow-x-auto rounded-2xl border border-slate-800">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-slate-950/80 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
-              <tr>
-                <th className="py-3.5 px-4">Pos / Token</th>
-                <th className="py-3.5 px-4">Customer</th>
-                <th className="py-3.5 px-4">Service</th>
-                <th className="py-3.5 px-4">Priority</th>
-                <th className="py-3.5 px-4">Wait Time</th>
-                <th className="py-3.5 px-4">Status</th>
-                <th className="py-3.5 px-4 text-right">Desk Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-800/80 bg-slate-900/60 text-slate-300">
-              {filteredTokens.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="py-10 text-center text-slate-500">
-                    No matching queue entries found.
-                  </td>
+          {/* TABLE */}
+          <div className="min-w-0 overflow-x-auto rounded-2xl border border-[var(--border)]">
+            <table className="w-full min-w-[850px] text-left text-xs">
+              <thead className="border-b border-[var(--border)] bg-[var(--card-soft)] text-[var(--muted)]">
+                <tr className="text-[10px] uppercase tracking-wider">
+                  <th className="px-4 py-3.5 font-bold">
+                    Pos / Token
+                  </th>
+                  <th className="px-4 py-3.5 font-bold">
+                    Customer
+                  </th>
+                  <th className="px-4 py-3.5 font-bold">
+                    Service
+                  </th>
+                  <th className="px-4 py-3.5 font-bold">
+                    Priority
+                  </th>
+                  <th className="px-4 py-3.5 font-bold">
+                    Wait Time
+                  </th>
+                  <th className="px-4 py-3.5 font-bold">
+                    Status
+                  </th>
+                  <th className="px-4 py-3.5 text-right font-bold">
+                    Desk Actions
+                  </th>
                 </tr>
-              ) : (
-                filteredTokens.map((token, index) => {
-                  const isServing = token.status === 'serving' || token.status === 'called';
-                  const isWaiting = token.status === 'waiting';
+              </thead>
 
-                  return (
-                    <tr
-                      key={token.id}
-                      className={`hover:bg-slate-800/50 transition-colors ${
-                        token.priority === 'priority' ? 'bg-amber-950/10' : ''
-                      }`}
+              <tbody className="divide-y divide-[var(--border)]">
+                {filteredTokens.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={7}
+                      className="py-14 text-center text-[var(--muted)]"
                     >
-                      {/* Token Number */}
-                      <td className="py-3.5 px-4 whitespace-nowrap">
-                        <div className="flex items-center gap-2">
-                          <span className="w-5 h-5 rounded-full bg-slate-800 font-mono text-[10px] font-bold text-slate-400 flex items-center justify-center">
-                            {isWaiting ? index + 1 : '—'}
-                          </span>
-                          <span className="font-mono font-black text-sm text-white">{token.tokenNumber}</span>
-                        </div>
-                      </td>
+                      <Users className="mx-auto mb-2 h-7 w-7 opacity-30" />
+                      No matching queue entries found.
+                    </td>
+                  </tr>
+                ) : (
+                  filteredTokens.map((token, index) => {
+                    const isServing =
+                      token.status === 'serving' ||
+                      token.status === 'called';
 
-                      {/* Customer Name */}
-                      <td className="py-3.5 px-4 whitespace-nowrap">
-                        <div>
-                          <p className="font-bold text-white">{token.customerName}</p>
-                          {token.customerPhone && (
-                            <p className="text-[10px] text-slate-400">{token.customerPhone}</p>
-                          )}
-                          {token.notes && (
-                            <p className="text-[10px] text-indigo-300 italic truncate max-w-[140px]">
-                              {token.notes}
+                    const isWaiting =
+                      token.status === 'waiting';
+
+                    return (
+                      <tr
+                        key={token.id}
+                        className={`
+                          transition-colors hover:bg-[var(--card-soft)]
+                          ${
+                            token.priority === 'priority'
+                              ? 'bg-amber-500/5'
+                              : ''
+                          }
+                        `}
+                      >
+                        {/* TOKEN */}
+                        <td className="whitespace-nowrap px-4 py-3.5">
+                          <div className="flex items-center gap-2">
+                            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--card-soft)] font-mono text-[10px] font-bold text-[var(--muted)]">
+                              {isWaiting ? index + 1 : '—'}
+                            </span>
+
+                            <span className="font-mono text-sm font-black text-[var(--foreground)]">
+                              {token.tokenNumber}
+                            </span>
+                          </div>
+                        </td>
+
+                        {/* CUSTOMER */}
+                        <td className="px-4 py-3.5">
+                          <div className="min-w-0 max-w-[180px]">
+                            <p className="truncate font-bold text-[var(--foreground)]">
+                              {token.customerName}
                             </p>
+
+                            {token.customerPhone && (
+                              <p className="truncate text-[10px] text-[var(--muted)]">
+                                {token.customerPhone}
+                              </p>
+                            )}
+
+                            {token.notes && (
+                              <p className="truncate text-[10px] italic text-blue-500 dark:text-blue-300">
+                                {token.notes}
+                              </p>
+                            )}
+                          </div>
+                        </td>
+
+                        {/* SERVICE */}
+                        <td className="px-4 py-3.5">
+                          <span className="whitespace-nowrap font-medium text-[var(--foreground)]">
+                            {token.serviceName}
+                          </span>
+                        </td>
+
+                        {/* PRIORITY */}
+                        <td className="whitespace-nowrap px-4 py-3.5">
+                          {token.priority === 'priority' ? (
+                            <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-[10px] font-bold text-amber-600 dark:text-amber-300">
+                              <Zap className="h-3 w-3 text-amber-500" />
+                              VIP Priority
+                            </span>
+                          ) : (
+                            <span className="rounded-full bg-[var(--card-soft)] px-2.5 py-1 text-[10px] font-medium text-[var(--muted)]">
+                              Standard
+                            </span>
                           )}
-                        </div>
-                      </td>
+                        </td>
 
-                      {/* Service Category */}
-                      <td className="py-3.5 px-4 whitespace-nowrap">
-                        <span className="font-medium text-slate-200">{token.serviceName}</span>
-                      </td>
+                        {/* WAIT */}
+                        <td className="whitespace-nowrap px-4 py-3.5">
+                          <div className="flex items-center gap-1 font-mono font-semibold text-cyan-500">
+                            <Clock className="h-3 w-3 text-[var(--muted)]" />
 
-                      {/* Priority Badge */}
-                      <td className="py-3.5 px-4 whitespace-nowrap">
-                        {token.priority === 'priority' ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">
-                            <Zap className="w-3 h-3 text-amber-400" />
-                            <span>VIP Priority</span>
+                            <span>
+                              {isServing
+                                ? 'Now'
+                                : isWaiting
+                                ? `~${token.estimatedWaitMinutes}m`
+                                : token.status === 'completed'
+                                ? 'Served'
+                                : '—'}
+                            </span>
+                          </div>
+                        </td>
+
+                        {/* STATUS */}
+                        <td className="whitespace-nowrap px-4 py-3.5">
+                          <span
+                            className={`
+                              rounded-full px-2.5 py-1 text-[9px] font-black uppercase tracking-wider
+                              ${
+                                token.status === 'serving'
+                                  ? 'border border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-300'
+                                  : token.status === 'called'
+                                  ? 'border border-cyan-500/30 bg-cyan-500/10 text-cyan-600 dark:text-cyan-300'
+                                  : token.status === 'waiting'
+                                  ? 'bg-blue-500/10 text-blue-600 dark:text-blue-300'
+                                  : token.status === 'completed'
+                                  ? 'bg-purple-500/10 text-purple-600 dark:text-purple-300'
+                                  : token.status === 'skipped'
+                                  ? 'bg-rose-500/10 text-rose-600 dark:text-rose-300'
+                                  : 'bg-[var(--card-soft)] text-[var(--muted)]'
+                              }
+                            `}
+                          >
+                            {token.status}
+
+                            {token.assignedCounter
+                              ? ` (Desk ${token.assignedCounter})`
+                              : ''}
                           </span>
-                        ) : (
-                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-slate-800 text-slate-400">
-                            Standard
-                          </span>
-                        )}
-                      </td>
+                        </td>
 
-                      {/* Waiting Time */}
-                      <td className="py-3.5 px-4 whitespace-nowrap">
-                        <div className="flex items-center gap-1 font-mono text-cyan-400 font-semibold">
-                          <Clock className="w-3 h-3 text-slate-400" />
-                          <span>
-                            {isServing
-                              ? 'Now'
-                              : isWaiting
-                              ? `~${token.estimatedWaitMinutes}m`
-                              : token.status === 'completed'
-                              ? 'Served'
-                              : '—'}
-                          </span>
-                        </div>
-                      </td>
+                        {/* ACTIONS */}
+                        <td className="whitespace-nowrap px-4 py-3.5 text-right">
+                          <div className="flex items-center justify-end gap-1.5">
 
-                      {/* Status */}
-                      <td className="py-3.5 px-4 whitespace-nowrap">
-                        <span
-                          className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                            token.status === 'serving'
-                              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 animate-pulse'
-                              : token.status === 'called'
-                              ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
-                              : token.status === 'waiting'
-                              ? 'bg-indigo-500/20 text-indigo-300'
-                              : token.status === 'completed'
-                              ? 'bg-purple-500/20 text-purple-300'
-                              : 'bg-slate-800 text-slate-400'
-                          }`}
-                        >
-                          {token.status}
-                          {token.assignedCounter ? ` (Desk ${token.assignedCounter})` : ''}
-                        </span>
-                      </td>
-
-                      {/* Row Action Controls */}
-                      <td className="py-3.5 px-4 whitespace-nowrap text-right">
-                        <div className="flex items-center justify-end gap-1.5">
-                          {isWaiting && (
-                            <>
-                              <button
-                                onClick={() => recallToken(token.id, selectedCounterId)}
-                                className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] transition-all flex items-center gap-1 cursor-pointer"
-                                title="Call directly to selected counter"
-                              >
-                                <Volume2 className="w-3 h-3" />
-                                <span>Call</span>
-                              </button>
-
-                              {token.priority !== 'priority' && (
+                            {isWaiting && (
+                              <>
                                 <button
-                                  onClick={() => prioritizeToken(token.id)}
-                                  className="p-1 rounded-lg bg-slate-800 hover:bg-amber-500/20 text-slate-400 hover:text-amber-400 border border-slate-700 transition-all cursor-pointer"
-                                  title="Upgrade to VIP Priority"
+                                  onClick={() =>
+                                    recallToken(
+                                      token.id,
+                                      selectedCounterId
+                                    )
+                                  }
+                                  className="flex items-center gap-1 rounded-lg bg-blue-600 px-2.5 py-1.5 text-[10px] font-bold text-white transition-all hover:bg-blue-500"
                                 >
-                                  <Zap className="w-3.5 h-3.5" />
+                                  <Volume2 className="h-3 w-3" />
+                                  Call
                                 </button>
-                              )}
 
-                              <button
-                                onClick={() => skipToken(token.id)}
-                                className="p-1 rounded-lg bg-slate-800 hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 border border-slate-700 transition-all cursor-pointer"
-                                title="Mark as Skipped (No Show)"
-                              >
-                                <UserX className="w-3.5 h-3.5" />
-                              </button>
-                            </>
-                          )}
+                                {token.priority !==
+                                  'priority' && (
+                                  <button
+                                    onClick={() =>
+                                      prioritizeToken(
+                                        token.id
+                                      )
+                                    }
+                                    className="rounded-lg border border-[var(--border)] bg-[var(--card-soft)] p-1.5 text-[var(--muted)] transition-all hover:bg-amber-500/10 hover:text-amber-500"
+                                    title="Upgrade to VIP Priority"
+                                  >
+                                    <Zap className="h-3.5 w-3.5" />
+                                  </button>
+                                )}
 
-                          {isServing && (
-                            <>
-                              <button
-                                onClick={() => completeCurrent(token.id)}
-                                className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] transition-all flex items-center gap-1 cursor-pointer"
-                              >
-                                <CheckCircle2 className="w-3 h-3" />
-                                <span>Complete</span>
-                              </button>
-                              <button
-                                onClick={() => skipToken(token.id)}
-                                className="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold text-[11px] transition-all cursor-pointer"
-                              >
-                                Skip
-                              </button>
-                            </>
-                          )}
+                                <button
+                                  onClick={() =>
+                                    skipToken(token.id)
+                                  }
+                                  className="rounded-lg border border-[var(--border)] bg-[var(--card-soft)] p-1.5 text-[var(--muted)] transition-all hover:bg-rose-500/10 hover:text-rose-500"
+                                  title="Mark as Skipped"
+                                >
+                                  <UserX className="h-3.5 w-3.5" />
+                                </button>
+                              </>
+                            )}
 
-                          {token.status === 'skipped' && (
-                            <button
-                              onClick={() => recallToken(token.id, selectedCounterId)}
-                              className="px-2.5 py-1 rounded-lg bg-amber-600/30 hover:bg-amber-600/50 border border-amber-500/40 text-amber-200 font-bold text-[11px] transition-all flex items-center gap-1 cursor-pointer"
-                              title="Recall customer back into queue"
-                            >
-                              <RotateCcw className="w-3 h-3" />
-                              <span>Recall</span>
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
+                            {isServing && (
+                              <>
+                                <button
+                                  onClick={() =>
+                                    completeCurrent(
+                                      token.id
+                                    )
+                                  }
+                                  className="flex items-center gap-1 rounded-lg bg-emerald-600 px-2.5 py-1.5 text-[10px] font-bold text-white transition-all hover:bg-emerald-500"
+                                >
+                                  <CheckCircle2 className="h-3 w-3" />
+                                  Complete
+                                </button>
+
+                                <button
+                                  onClick={() =>
+                                    skipToken(token.id)
+                                  }
+                                  className="rounded-lg bg-amber-500/10 px-2.5 py-1.5 text-[10px] font-bold text-amber-600 transition-all hover:bg-amber-500/20 dark:text-amber-300"
+                                >
+                                  Skip
+                                </button>
+                              </>
+                            )}
+
+                            {token.status === 'skipped' && (
+                              <button
+                                onClick={() =>
+                                  recallToken(
+                                    token.id,
+                                    selectedCounterId
+                                  )
+                                }
+                                className="flex items-center gap-1 rounded-lg border border-amber-500/30 bg-amber-500/10 px-2.5 py-1.5 text-[10px] font-bold text-amber-600 transition-all hover:bg-amber-500/20 dark:text-amber-300"
+                              >
+                                <RotateCcw className="h-3 w-3" />
+                                Recall
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+        </section>
       </div>
 
-      {/* Add Walk-in Modal */}
+      {/* =========================================================
+          WALK-IN MODAL
+      ========================================================== */}
       {showAddWalkin && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-950/60 p-4 backdrop-blur-sm">
           <form
             onSubmit={handleWalkinSubmit}
-            className="max-w-lg w-full p-6 rounded-3xl bg-slate-900 border border-slate-700 shadow-2xl space-y-4 animate-in zoom-in-95 duration-200"
+            className="my-4 w-full max-w-lg space-y-4 rounded-3xl border border-[var(--border)] bg-[var(--card)] p-5 shadow-2xl sm:p-6"
           >
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-              <div className="flex items-center gap-2">
-                <Plus className="w-5 h-5 text-cyan-400" />
-                <h3 className="text-base font-bold text-white">Manual Walk-In Registration</h3>
+            <div className="flex items-center justify-between gap-3 border-b border-[var(--border)] pb-4">
+              <div className="flex min-w-0 items-center gap-2">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-500/10">
+                  <Plus className="h-5 w-5 text-blue-500" />
+                </div>
+
+                <h3 className="truncate text-base font-black text-[var(--foreground)]">
+                  Manual Walk-In Registration
+                </h3>
               </div>
+
               <button
                 type="button"
                 onClick={() => setShowAddWalkin(false)}
-                className="text-slate-400 hover:text-white"
+                className="shrink-0 rounded-lg p-1.5 text-[var(--muted)] transition-all hover:bg-[var(--card-soft)] hover:text-[var(--foreground)]"
               >
-                ✕
+                <X className="h-4 w-4" />
               </button>
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-300">Customer Full Name *</label>
+              <label className="text-xs font-bold text-[var(--foreground)]">
+                Customer Full Name *
+              </label>
+
               <input
                 type="text"
                 required
                 placeholder="e.g. Rachel Adams"
                 value={walkinName}
-                onChange={(e) => setWalkinName(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs focus:ring-1 focus:ring-indigo-500"
+                onChange={(event) =>
+                  setWalkinName(event.target.value)
+                }
+                className="w-full rounded-xl border border-[var(--border)] bg-[var(--card-soft)] px-3.5 py-2.5 text-xs text-[var(--foreground)] placeholder:text-[var(--muted)] focus:outline-none focus:ring-2 focus:ring-blue-500/30"
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-300">Service Category</label>
+                <label className="text-xs font-bold text-[var(--foreground)]">
+                  Service Category
+                </label>
+
                 <select
                   value={walkinService}
-                  onChange={(e) => setWalkinService(e.target.value as ServiceId)}
-                  className="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs focus:ring-1 focus:ring-indigo-500"
+                  onChange={(event) =>
+                    setWalkinService(
+                      event.target.value as ServiceId
+                    )
+                  }
+                  className="w-full rounded-xl border border-[var(--border)] bg-[var(--card-soft)] px-3 py-2.5 text-xs text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-blue-500/30"
                 >
-                  {services.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.name} (~{s.avgDurationMinutes}m)
+                  {services.map((service) => (
+                    <option
+                      key={service.id}
+                      value={service.id}
+                    >
+                      {service.name} (~
+                      {service.avgDurationMinutes}m)
                     </option>
                   ))}
                 </select>
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-300">Priority Tier</label>
+                <label className="text-xs font-bold text-[var(--foreground)]">
+                  Priority Tier
+                </label>
+
                 <select
                   value={walkinPriority}
-                  onChange={(e) => setWalkinPriority(e.target.value as PriorityLevel)}
-                  className="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs focus:ring-1 focus:ring-indigo-500"
+                  onChange={(event) =>
+                    setWalkinPriority(
+                      event.target.value as PriorityLevel
+                    )
+                  }
+                  className="w-full rounded-xl border border-[var(--border)] bg-[var(--card-soft)] px-3 py-2.5 text-xs text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-blue-500/30"
                 >
-                  <option value="normal">Standard Walk-in</option>
-                  <option value="priority">⭐ VIP Priority Pass</option>
+                  <option value="normal">
+                    Standard Walk-in
+                  </option>
+
+                  <option value="priority">
+                    ⭐ VIP Priority Pass
+                  </option>
                 </select>
               </div>
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-300">Phone Number (Optional)</label>
+              <label className="text-xs font-bold text-[var(--foreground)]">
+                Phone Number (Optional)
+              </label>
+
               <input
                 type="tel"
                 placeholder="+1 (555) 000-0000"
                 value={walkinPhone}
-                onChange={(e) => setWalkinPhone(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs focus:ring-1 focus:ring-indigo-500"
+                onChange={(event) =>
+                  setWalkinPhone(event.target.value)
+                }
+                className="w-full rounded-xl border border-[var(--border)] bg-[var(--card-soft)] px-3.5 py-2.5 text-xs text-[var(--foreground)] placeholder:text-[var(--muted)] focus:outline-none focus:ring-2 focus:ring-blue-500/30"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-300">Staff Note / Reason</label>
+              <label className="text-xs font-bold text-[var(--foreground)]">
+                Staff Note / Reason
+              </label>
+
               <input
                 type="text"
                 placeholder="e.g. Senior citizen fast-track"
                 value={walkinNotes}
-                onChange={(e) => setWalkinNotes(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs focus:ring-1 focus:ring-indigo-500"
+                onChange={(event) =>
+                  setWalkinNotes(event.target.value)
+                }
+                className="w-full rounded-xl border border-[var(--border)] bg-[var(--card-soft)] px-3.5 py-2.5 text-xs text-[var(--foreground)] placeholder:text-[var(--muted)] focus:outline-none focus:ring-2 focus:ring-blue-500/30"
               />
             </div>
 
-            <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
+            <div className="flex flex-col-reverse gap-2 border-t border-[var(--border)] pt-4 sm:flex-row sm:justify-end">
               <button
                 type="button"
                 onClick={() => setShowAddWalkin(false)}
-                className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold"
+                className="rounded-xl bg-[var(--card-soft)] px-4 py-2.5 text-xs font-bold text-[var(--foreground)] transition-all hover:opacity-80"
               >
                 Cancel
               </button>
+
               <button
                 type="submit"
-                className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-lg"
+                className="rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-bold text-white shadow-lg transition-all hover:bg-blue-500"
               >
                 Generate Token & Place in Line
               </button>
@@ -726,58 +1113,84 @@ export const AdminDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* Add Counter Modal */}
+      {/* =========================================================
+          ADD COUNTER MODAL
+      ========================================================== */}
       {showAddCounterModal && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-950/60 p-4 backdrop-blur-sm">
           <form
             onSubmit={handleCreateCounter}
-            className="max-w-md w-full p-6 rounded-3xl bg-slate-900 border border-slate-700 shadow-2xl space-y-4 animate-in zoom-in-95 duration-200"
+            className="my-4 w-full max-w-md space-y-4 rounded-3xl border border-[var(--border)] bg-[var(--card)] p-5 shadow-2xl sm:p-6"
           >
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-              <h3 className="text-base font-bold text-white">Create New Service Counter</h3>
+            <div className="flex items-center justify-between gap-3 border-b border-[var(--border)] pb-4">
+              <div className="flex min-w-0 items-center gap-2">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-500/10">
+                  <Building2 className="h-5 w-5 text-blue-500" />
+                </div>
+
+                <h3 className="truncate text-base font-black text-[var(--foreground)]">
+                  Create New Service Counter
+                </h3>
+              </div>
+
               <button
                 type="button"
-                onClick={() => setShowAddCounterModal(false)}
-                className="text-slate-400 hover:text-white"
+                onClick={() =>
+                  setShowAddCounterModal(false)
+                }
+                className="shrink-0 rounded-lg p-1.5 text-[var(--muted)] transition-all hover:bg-[var(--card-soft)] hover:text-[var(--foreground)]"
               >
-                ✕
+                <X className="h-4 w-4" />
               </button>
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-300">Desk / Station Name *</label>
+              <label className="text-xs font-bold text-[var(--foreground)]">
+                Desk / Station Name *
+              </label>
+
               <input
                 type="text"
                 required
                 placeholder="e.g. Counter 4 - Specialist Desk"
                 value={newCounterName}
-                onChange={(e) => setNewCounterName(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs"
+                onChange={(event) =>
+                  setNewCounterName(event.target.value)
+                }
+                className="w-full rounded-xl border border-[var(--border)] bg-[var(--card-soft)] px-3.5 py-2.5 text-xs text-[var(--foreground)] placeholder:text-[var(--muted)] focus:outline-none focus:ring-2 focus:ring-blue-500/30"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-300">Assigned Staff Name</label>
+              <label className="text-xs font-bold text-[var(--foreground)]">
+                Assigned Staff Name
+              </label>
+
               <input
                 type="text"
                 placeholder="e.g. Alex Henderson"
                 value={newStaffName}
-                onChange={(e) => setNewStaffName(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs"
+                onChange={(event) =>
+                  setNewStaffName(event.target.value)
+                }
+                className="w-full rounded-xl border border-[var(--border)] bg-[var(--card-soft)] px-3.5 py-2.5 text-xs text-[var(--foreground)] placeholder:text-[var(--muted)] focus:outline-none focus:ring-2 focus:ring-blue-500/30"
               />
             </div>
 
-            <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
+            <div className="flex flex-col-reverse gap-2 border-t border-[var(--border)] pt-4 sm:flex-row sm:justify-end">
               <button
                 type="button"
-                onClick={() => setShowAddCounterModal(false)}
-                className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold"
+                onClick={() =>
+                  setShowAddCounterModal(false)
+                }
+                className="rounded-xl bg-[var(--card-soft)] px-4 py-2.5 text-xs font-bold text-[var(--foreground)] transition-all hover:opacity-80"
               >
                 Cancel
               </button>
+
               <button
                 type="submit"
-                className="px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold shadow-lg"
+                className="rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-bold text-white shadow-lg transition-all hover:bg-blue-500"
               >
                 Add Station
               </button>

@@ -4,9 +4,7 @@ import {
   Sparkles,
   Ticket,
   LayoutDashboard,
-  Radio,
   BrainCircuit,
-  Users,
   Clock,
   Zap,
   ShieldCheck,
@@ -18,39 +16,49 @@ import {
   ArrowRight,
   CheckCircle2,
   ChevronRight,
-  TrendingDown,
-  Layers,
   BellRing,
   Tv,
+  Radio,
 } from 'lucide-react';
 
 export const LandingPage: React.FC = () => {
-  const { setActiveTab, analytics, tokens, counters, fastAddDemoCustomer, callNext } = useQueue();
+  const {
+    setActiveTab,
+    analytics,
+    tokens,
+    counters,
+    fastAddDemoCustomer,
+    callNext,
+  } = useQueue();
 
-  const waitingTokens = tokens.filter((t) => t.status === 'waiting');
-  const servingTokens = tokens.filter((t) => t.status === 'serving' || t.status === 'called');
+  const waitingTokens = tokens.filter(
+    (t) => t.status === 'waiting'
+  );
 
   const steps = [
     {
       step: '01',
       title: 'Digital Token Generation',
-      description: 'Visitors scan a QR code or pick their required service at the kiosk, receiving an instant digital ticket on their phone.',
+      description:
+        'Visitors scan a QR code or pick their required service at the kiosk, receiving an instant digital ticket on their phone.',
       icon: Ticket,
-      color: 'from-blue-500 to-cyan-500',
+      accent: 'blue',
     },
     {
       step: '02',
       title: 'AI Wait-Time & Queue Tracking',
-      description: 'SmartQueue AI calculates dynamic waiting estimates and alerts visitors as their turn approaches so they never wait in line.',
+      description:
+        'SmartQueue AI calculates dynamic waiting estimates and alerts visitors as their turn approaches so they never wait in line.',
       icon: BrainCircuit,
-      color: 'from-indigo-500 to-purple-500',
+      accent: 'sky',
     },
     {
       step: '03',
       title: 'Intelligent Multi-Desk Dispatch',
-      description: 'Staff call the next attendee with a single click. High-visibility TV boards and audio chimes guide visitors to the exact counter.',
+      description:
+        'Staff call the next attendee with a single click. High-visibility TV boards and audio chimes guide visitors to the exact counter.',
       icon: LayoutDashboard,
-      color: 'from-emerald-500 to-teal-500',
+      accent: 'indigo',
     },
   ];
 
@@ -60,211 +68,792 @@ export const LandingPage: React.FC = () => {
       subtitle: 'Admissions, Fee Desks & Registrars',
       icon: GraduationCap,
       stat: '68% faster enrollment clearance',
-      color: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20',
+      accent: 'blue',
     },
     {
       name: 'Hospitals & Clinics',
       subtitle: 'Triage, Diagnostics & Pharmacies',
       icon: Stethoscope,
       stat: 'Reduced physical waiting room crowding',
-      color: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+      accent: 'emerald',
     },
     {
       name: 'Banks & Financial Hubs',
       subtitle: 'Teller Desks, Loans & VIP Accounts',
       icon: Landmark,
       stat: 'Automated VIP priority routing',
-      color: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+      accent: 'amber',
     },
     {
       name: 'Government Citizen Desks',
       subtitle: 'Licensing, Passports & Civil Registry',
       icon: Building2,
       stat: 'Eliminated hallway bottleneck lines',
-      color: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+      accent: 'sky',
     },
     {
       name: 'Salons & Retail Centers',
       subtitle: 'Appointments & Express Checkouts',
       icon: Scissors,
       stat: 'Increased walk-in conversion by 42%',
-      color: 'bg-rose-500/10 text-rose-400 border-rose-500/20',
+      accent: 'rose',
     },
   ];
 
+  const accentStyles: Record<
+    string,
+    {
+      iconLight: string;
+      iconDark: string;
+      bgLight: string;
+      bgDark: string;
+      borderLight: string;
+      borderDark: string;
+    }
+  > = {
+    blue: {
+      iconLight: 'text-blue-700',
+      iconDark: 'text-blue-300',
+      bgLight: 'bg-blue-50',
+      bgDark: 'bg-blue-500/10',
+      borderLight: 'border-blue-200',
+      borderDark: 'border-blue-500/20',
+    },
+    sky: {
+      iconLight: 'text-sky-700',
+      iconDark: 'text-sky-300',
+      bgLight: 'bg-sky-50',
+      bgDark: 'bg-sky-500/10',
+      borderLight: 'border-sky-200',
+      borderDark: 'border-sky-500/20',
+    },
+    indigo: {
+      iconLight: 'text-indigo-700',
+      iconDark: 'text-indigo-300',
+      bgLight: 'bg-indigo-50',
+      bgDark: 'bg-indigo-500/10',
+      borderLight: 'border-indigo-200',
+      borderDark: 'border-indigo-500/20',
+    },
+    emerald: {
+      iconLight: 'text-emerald-700',
+      iconDark: 'text-emerald-300',
+      bgLight: 'bg-emerald-50',
+      bgDark: 'bg-emerald-500/10',
+      borderLight: 'border-emerald-200',
+      borderDark: 'border-emerald-500/20',
+    },
+    amber: {
+      iconLight: 'text-amber-700',
+      iconDark: 'text-amber-300',
+      bgLight: 'bg-amber-50',
+      bgDark: 'bg-amber-500/10',
+      borderLight: 'border-amber-200',
+      borderDark: 'border-amber-500/20',
+    },
+    rose: {
+      iconLight: 'text-rose-700',
+      iconDark: 'text-rose-300',
+      bgLight: 'bg-rose-50',
+      bgDark: 'bg-rose-500/10',
+      borderLight: 'border-rose-200',
+      borderDark: 'border-rose-500/20',
+    },
+  };
+
   return (
     <div className="space-y-16 pb-16">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden pt-8 pb-12 sm:pt-14 sm:pb-20 border-b border-slate-800/80 bg-gradient-to-b from-slate-900 via-slate-900/60 to-slate-950">
-        {/* Glow ambient background circles */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-indigo-600/15 blur-[120px] pointer-events-none rounded-full" />
-        <div className="absolute top-1/3 right-10 w-[300px] h-[250px] bg-cyan-500/10 blur-[100px] pointer-events-none rounded-full" />
+
+      {/* =====================================================
+          HERO
+      ====================================================== */}
+
+      <section
+        className="
+          relative overflow-hidden
+          pt-10 pb-14
+          sm:pt-16 sm:pb-20
+          border-b
+          border-[var(--border)]
+          bg-[var(--background)]
+          transition-colors duration-300
+        "
+      >
+        {/* Soft background decoration */}
+
+        <div
+          className="
+            absolute
+            top-[-160px]
+            left-1/2
+            -translate-x-1/2
+            w-[700px]
+            h-[420px]
+            rounded-full
+            bg-blue-200/30
+            dark:bg-blue-500/10
+            blur-[110px]
+            pointer-events-none
+          "
+        />
+
+        <div
+          className="
+            absolute
+            right-[-120px]
+            top-24
+            w-[300px]
+            h-[300px]
+            rounded-full
+            bg-sky-200/30
+            dark:bg-sky-500/10
+            blur-[100px]
+            pointer-events-none
+          "
+        />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <div className="text-center max-w-3xl mx-auto space-y-6">
-            {/* Tagline Pill */}
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs font-semibold shadow-inner">
-              <Sparkles className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
-              <span>Next-Gen Smart Token & Queue Management</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-              <span className="text-emerald-400 font-mono text-[11px]">System Live</span>
+
+          <div className="text-center max-w-3xl mx-auto space-y-7">
+
+            {/* Tagline */}
+
+            <div
+              className="
+                inline-flex items-center gap-2
+                px-4 py-2
+                rounded-full
+                bg-blue-50
+                dark:bg-blue-500/10
+                border border-blue-200
+                dark:border-blue-500/25
+                text-blue-700
+                dark:text-blue-300
+                text-xs font-semibold
+                shadow-sm
+              "
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+
+              <span>
+                Next-Gen Smart Token & Queue Management
+              </span>
+
+              <span
+                className="
+                  w-1.5 h-1.5
+                  rounded-full
+                  bg-emerald-500
+                  animate-pulse
+                "
+              />
+
+              <span
+                className="
+                  text-emerald-600
+                  dark:text-emerald-400
+                  font-mono
+                  text-[11px]
+                "
+              >
+                System Live
+              </span>
             </div>
 
-            {/* Main Headline */}
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-[1.15]">
-              Smarter queues.{' '}
-              <span className="bg-gradient-to-r from-cyan-400 via-blue-400 to-indigo-400 bg-clip-text text-transparent">
+            {/* Heading */}
+
+            <h1
+              className="
+                text-4xl
+                sm:text-5xl
+                lg:text-6xl
+                font-extrabold
+                tracking-tight
+                leading-[1.08]
+                text-[var(--foreground)]
+              "
+            >
+              Smarter queues.
+              <br />
+
+              <span
+                className="
+                  bg-gradient-to-r
+                  from-blue-700
+                  via-sky-600
+                  to-indigo-600
+                  dark:from-blue-300
+                  dark:via-sky-300
+                  dark:to-indigo-300
+                  bg-clip-text
+                  text-transparent
+                "
+              >
                 Less waiting.
               </span>
             </h1>
 
-            {/* Subtext */}
-            <p className="text-base sm:text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed font-normal">
-              Empower visitors to join lines digitally, receive real-time wait predictions, and track tokens from their smartphones. Give staff seamless multi-counter dispatching and predictive AI analytics.
+            {/* Description */}
+
+            <p
+              className="
+                text-base
+                sm:text-lg
+                text-[var(--muted)]
+                max-w-2xl
+                mx-auto
+                leading-relaxed
+              "
+            >
+              Empower visitors to join lines digitally, receive
+              real-time wait predictions, and track tokens from
+              their smartphones. Give staff seamless multi-counter
+              dispatching and predictive AI analytics.
             </p>
 
-            {/* Main CTA Buttons */}
-            <div className="flex flex-wrap items-center justify-center gap-3.5 pt-2">
+            {/* CTA buttons */}
+
+            <div
+              className="
+                flex flex-wrap
+                items-center
+                justify-center
+                gap-3
+                pt-1
+              "
+            >
               <button
                 id="hero-join-queue-btn"
                 onClick={() => setActiveTab('join')}
-                className="flex items-center gap-2.5 px-6 py-3.5 rounded-xl bg-gradient-to-r from-indigo-600 via-blue-600 to-cyan-500 hover:from-indigo-500 hover:to-cyan-400 text-white font-bold text-sm shadow-lg shadow-indigo-500/25 transition-all transform hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
+                className="
+                  flex items-center gap-2.5
+                  px-6 py-3.5
+                  rounded-xl
+                  bg-[#17324d]
+                  hover:bg-[#234d70]
+                  dark:bg-blue-500
+                  dark:hover:bg-blue-400
+                  text-white
+                  font-bold
+                  text-sm
+                  shadow-lg
+                  shadow-blue-900/10
+                  dark:shadow-blue-500/20
+                  transition-all
+                  hover:-translate-y-0.5
+                  active:translate-y-0
+                "
               >
                 <Ticket className="w-4 h-4" />
                 <span>Join Queue as Customer</span>
-                <ArrowRight className="w-4 h-4 ml-0.5" />
+                <ArrowRight className="w-4 h-4" />
               </button>
 
               <button
                 id="hero-admin-dash-btn"
                 onClick={() => setActiveTab('admin')}
-                className="flex items-center gap-2 px-5 py-3.5 rounded-xl bg-slate-800/90 hover:bg-slate-700/90 border border-slate-700 text-slate-100 font-semibold text-sm transition-all shadow-md hover:border-slate-600 cursor-pointer"
+                className="
+                  flex items-center gap-2
+                  px-5 py-3.5
+                  rounded-xl
+                  bg-white
+                  dark:bg-slate-900
+                  hover:bg-blue-50
+                  dark:hover:bg-slate-800
+                  border
+                  border-[var(--border)]
+                  text-[var(--foreground)]
+                  font-semibold
+                  text-sm
+                  shadow-sm
+                  transition-all
+                  hover:-translate-y-0.5
+                "
               >
-                <LayoutDashboard className="w-4 h-4 text-indigo-400" />
+                <LayoutDashboard
+                  className="
+                    w-4 h-4
+                    text-blue-700
+                    dark:text-blue-300
+                  "
+                />
                 <span>Admin Staff Desk</span>
               </button>
 
               <button
                 id="hero-live-tv-btn"
                 onClick={() => setActiveTab('kiosk')}
-                className="flex items-center gap-2 px-4 py-3.5 rounded-xl bg-cyan-950/40 hover:bg-cyan-900/40 border border-cyan-500/30 text-cyan-300 font-semibold text-sm transition-all hover:border-cyan-500/50 cursor-pointer"
+                className="
+                  flex items-center gap-2
+                  px-4 py-3.5
+                  rounded-xl
+                  bg-sky-50
+                  dark:bg-sky-500/10
+                  hover:bg-sky-100
+                  dark:hover:bg-sky-500/15
+                  border
+                  border-sky-200
+                  dark:border-sky-500/25
+                  text-sky-700
+                  dark:text-sky-300
+                  font-semibold
+                  text-sm
+                  transition-all
+                  hover:-translate-y-0.5
+                "
               >
-                <Tv className="w-4 h-4 text-cyan-400" />
+                <Tv className="w-4 h-4" />
                 <span>TV Display Screen</span>
               </button>
             </div>
 
-            {/* Quick Metrics Ticker */}
-            <div className="pt-6 grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-2xl mx-auto">
-              <div className="p-3 rounded-xl bg-slate-800/50 border border-slate-800 text-center">
-                <p className="text-xl font-bold font-mono text-white">{analytics.totalWaiting}</p>
-                <p className="text-[11px] text-slate-400 uppercase tracking-wider font-semibold">In Line</p>
-              </div>
-              <div className="p-3 rounded-xl bg-slate-800/50 border border-slate-800 text-center">
-                <p className="text-xl font-bold font-mono text-cyan-400">{analytics.avgWaitTimeMinutes}m</p>
-                <p className="text-[11px] text-slate-400 uppercase tracking-wider font-semibold">Avg Wait Time</p>
-              </div>
-              <div className="p-3 rounded-xl bg-slate-800/50 border border-slate-800 text-center">
-                <p className="text-xl font-bold font-mono text-emerald-400">{analytics.totalServedToday}</p>
-                <p className="text-[11px] text-slate-400 uppercase tracking-wider font-semibold">Served Today</p>
-              </div>
-              <div className="p-3 rounded-xl bg-slate-800/50 border border-slate-800 text-center">
-                <p className="text-xl font-bold font-mono text-indigo-400">{counters.filter(c => c.status !== 'closed').length}</p>
-                <p className="text-[11px] text-slate-400 uppercase tracking-wider font-semibold">Open Desks</p>
-              </div>
+            {/* Metrics */}
+
+            <div
+              className="
+                pt-6
+                grid
+                grid-cols-2
+                sm:grid-cols-4
+                gap-3
+                max-w-2xl
+                mx-auto
+              "
+            >
+              {[
+                {
+                  value: analytics.totalWaiting,
+                  label: 'In Line',
+                  accent: 'text-[var(--foreground)]',
+                },
+                {
+                  value: `${analytics.avgWaitTimeMinutes}m`,
+                  label: 'Avg Wait Time',
+                  accent:
+                    'text-blue-700 dark:text-blue-300',
+                },
+                {
+                  value: analytics.totalServedToday,
+                  label: 'Served Today',
+                  accent:
+                    'text-emerald-700 dark:text-emerald-300',
+                },
+                {
+                  value: counters.filter(
+                    (c) => c.status !== 'closed'
+                  ).length,
+                  label: 'Open Desks',
+                  accent:
+                    'text-indigo-700 dark:text-indigo-300',
+                },
+              ].map((metric) => (
+                <div
+                  key={metric.label}
+                  className="
+                    p-4
+                    rounded-2xl
+                    bg-white
+                    dark:bg-slate-900/70
+                    border
+                    border-[var(--border)]
+                    text-center
+                    shadow-sm
+                    hover:-translate-y-0.5
+                    transition-all
+                  "
+                >
+                  <p
+                    className={`
+                      text-xl
+                      font-bold
+                      font-mono
+                      ${metric.accent}
+                    `}
+                  >
+                    {metric.value}
+                  </p>
+
+                  <p
+                    className="
+                      mt-1
+                      text-[10px]
+                      text-[var(--muted)]
+                      uppercase
+                      tracking-wider
+                      font-semibold
+                    "
+                  >
+                    {metric.label}
+                  </p>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
-      {/* Live Interactive Queue Status Snapshot */}
+      {/* =====================================================
+          LIVE QUEUE SNAPSHOT
+      ====================================================== */}
+
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="p-6 sm:p-8 rounded-2xl bg-gradient-to-b from-slate-800/90 to-slate-900 border border-slate-700/80 shadow-2xl space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-700/60">
+
+        <div
+          className="
+            p-6 sm:p-8
+            rounded-3xl
+            bg-white
+            dark:bg-slate-900/80
+            border
+            border-[var(--border)]
+            shadow-xl
+            shadow-blue-900/5
+            space-y-6
+          "
+        >
+
+          <div
+            className="
+              flex flex-col
+              sm:flex-row
+              sm:items-center
+              justify-between
+              gap-4
+              pb-5
+              border-b
+              border-[var(--border)]
+            "
+          >
             <div>
+
               <div className="flex items-center gap-2">
+
                 <span className="relative flex h-3 w-3">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-cyan-500"></span>
+                  <span
+                    className="
+                      animate-ping
+                      absolute
+                      inline-flex
+                      h-full w-full
+                      rounded-full
+                      bg-emerald-400
+                      opacity-60
+                    "
+                  />
+
+                  <span
+                    className="
+                      relative
+                      inline-flex
+                      rounded-full
+                      h-3 w-3
+                      bg-emerald-500
+                    "
+                  />
                 </span>
-                <h2 className="text-lg font-bold text-white tracking-tight">Live Station & Queue Status</h2>
+
+                <h2
+                  className="
+                    text-lg
+                    font-bold
+                    text-[var(--foreground)]
+                    tracking-tight
+                  "
+                >
+                  Live Station & Queue Status
+                </h2>
               </div>
-              <p className="text-xs text-slate-400 mt-0.5">Real-time state synchronized with desk operators & kiosks</p>
+
+              <p
+                className="
+                  text-xs
+                  text-[var(--muted)]
+                  mt-1
+                "
+              >
+                Real-time state synchronized with desk
+                operators & kiosks
+              </p>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2">
+            <div
+              className="
+                flex flex-wrap
+                items-center
+                gap-2
+              "
+            >
               <button
                 onClick={() => fastAddDemoCustomer(false)}
-                className="px-3 py-1.5 rounded-lg bg-indigo-500/20 hover:bg-indigo-500/30 border border-indigo-500/40 text-indigo-300 text-xs font-semibold transition-all flex items-center gap-1.5"
+                className="
+                  px-3 py-1.5
+                  rounded-lg
+                  bg-blue-50
+                  dark:bg-blue-500/10
+                  hover:bg-blue-100
+                  dark:hover:bg-blue-500/15
+                  border
+                  border-blue-200
+                  dark:border-blue-500/25
+                  text-blue-700
+                  dark:text-blue-300
+                  text-xs
+                  font-semibold
+                  transition-all
+                "
               >
-                <span>+ Add Sample Visitor</span>
+                + Add Sample Visitor
               </button>
+
               <button
                 onClick={() => callNext()}
-                className="px-3 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 text-xs font-semibold transition-all flex items-center gap-1.5"
+                className="
+                  px-3 py-1.5
+                  rounded-lg
+                  bg-emerald-50
+                  dark:bg-emerald-500/10
+                  hover:bg-emerald-100
+                  dark:hover:bg-emerald-500/15
+                  border
+                  border-emerald-200
+                  dark:border-emerald-500/25
+                  text-emerald-700
+                  dark:text-emerald-300
+                  text-xs
+                  font-semibold
+                  transition-all
+                "
               >
-                <span>Call Next Token</span>
+                Call Next Token
               </button>
+
               <button
                 onClick={() => setActiveTab('live')}
-                className="px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-semibold transition-all flex items-center gap-1"
+                className="
+                  px-3 py-1.5
+                  rounded-lg
+                  bg-[var(--card-soft)]
+                  dark:bg-slate-800
+                  hover:bg-blue-50
+                  dark:hover:bg-slate-700
+                  border
+                  border-[var(--border)]
+                  text-[var(--foreground)]
+                  text-xs
+                  font-semibold
+                  transition-all
+                  flex items-center gap-1
+                "
               >
-                <span>View Full Screen</span>
+                View Full Screen
                 <ChevronRight className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
 
-          {/* Active Counters Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Counter cards */}
+
+          <div
+            className="
+              grid
+              grid-cols-1
+              md:grid-cols-3
+              gap-4
+            "
+          >
             {counters.map((counter) => {
-              const servingToken = tokens.find((t) => t.id === counter.currentServingTokenId);
+              const servingToken = tokens.find(
+                (t) =>
+                  t.id === counter.currentServingTokenId
+              );
+
               return (
                 <div
                   key={counter.id}
-                  className={`p-4 rounded-xl border transition-all ${
-                    counter.status === 'closed'
-                      ? 'bg-slate-900/50 border-slate-800 opacity-60'
-                      : counter.currentServingTokenId
-                      ? 'bg-indigo-950/30 border-indigo-500/40 ring-1 ring-indigo-500/20'
-                      : 'bg-slate-900/80 border-slate-700/80'
-                  }`}
+                  className={`
+                    p-5
+                    rounded-2xl
+                    border
+                    transition-all
+                    ${
+                      counter.status === 'closed'
+                        ? `
+                          bg-[var(--card-soft)]
+                          dark:bg-slate-950/50
+                          border-[var(--border)]
+                          opacity-60
+                        `
+                        : counter.currentServingTokenId
+                          ? `
+                            bg-blue-50/80
+                            dark:bg-blue-500/10
+                            border-blue-200
+                            dark:border-blue-500/30
+                            shadow-sm
+                          `
+                          : `
+                            bg-[var(--card-soft)]
+                            dark:bg-slate-800/60
+                            border-[var(--border)]
+                          `
+                    }
+                  `}
                 >
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="font-semibold text-slate-300">{counter.name}</span>
+                  <div
+                    className="
+                      flex
+                      items-center
+                      justify-between
+                      text-xs
+                    "
+                  >
                     <span
-                      className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                        counter.status === 'closed'
-                          ? 'bg-slate-800 text-slate-400'
-                          : counter.currentServingTokenId
-                          ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                          : 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
-                      }`}
+                      className="
+                        font-semibold
+                        text-[var(--foreground)]
+                      "
                     >
-                      {counter.status === 'closed' ? 'Closed' : counter.currentServingTokenId ? 'Serving' : 'Ready'}
+                      {counter.name}
+                    </span>
+
+                    <span
+                      className={`
+                        px-2 py-0.5
+                        rounded-full
+                        text-[10px]
+                        font-bold
+                        uppercase
+                        tracking-wider
+                        border
+                        ${
+                          counter.status === 'closed'
+                            ? `
+                              bg-slate-100
+                              dark:bg-slate-800
+                              text-slate-500
+                              dark:text-slate-400
+                              border-transparent
+                            `
+                            : counter.currentServingTokenId
+                              ? `
+                                bg-emerald-50
+                                dark:bg-emerald-500/10
+                                text-emerald-700
+                                dark:text-emerald-300
+                                border-emerald-200
+                                dark:border-emerald-500/20
+                              `
+                              : `
+                                bg-sky-50
+                                dark:bg-sky-500/10
+                                text-sky-700
+                                dark:text-sky-300
+                                border-sky-200
+                                dark:border-sky-500/20
+                              `
+                        }
+                      `}
+                    >
+                      {counter.status === 'closed'
+                        ? 'Closed'
+                        : counter.currentServingTokenId
+                          ? 'Serving'
+                          : 'Ready'}
                     </span>
                   </div>
 
-                  <div className="mt-4 flex items-center justify-between">
+                  <div
+                    className="
+                      mt-5
+                      flex
+                      items-center
+                      justify-between
+                    "
+                  >
                     <div>
-                      <p className="text-[10px] uppercase font-bold text-slate-400">Current Token</p>
-                      <p className="text-2xl font-black font-mono tracking-tight text-white mt-0.5">
-                        {servingToken ? servingToken.tokenNumber : '— None —'}
+                      <p
+                        className="
+                          text-[10px]
+                          uppercase
+                          font-bold
+                          text-[var(--muted)]
+                        "
+                      >
+                        Current Token
+                      </p>
+
+                      <p
+                        className="
+                          text-2xl
+                          font-black
+                          font-mono
+                          tracking-tight
+                          text-[var(--foreground)]
+                          mt-1
+                        "
+                      >
+                        {servingToken
+                          ? servingToken.tokenNumber
+                          : '— None —'}
                       </p>
                     </div>
+
                     {servingToken && (
                       <div className="text-right">
-                        <p className="text-xs font-semibold text-indigo-300">{servingToken.customerName}</p>
-                        <p className="text-[11px] text-slate-400">{servingToken.serviceName}</p>
+                        <p
+                          className="
+                            text-xs
+                            font-semibold
+                            text-blue-700
+                            dark:text-blue-300
+                          "
+                        >
+                          {servingToken.customerName}
+                        </p>
+
+                        <p
+                          className="
+                            text-[11px]
+                            text-[var(--muted)]
+                          "
+                        >
+                          {servingToken.serviceName}
+                        </p>
                       </div>
                     )}
                   </div>
 
-                  <div className="mt-3 pt-3 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
-                    <span>Attendant: {counter.staffName}</span>
-                    {servingToken?.priority === 'priority' && (
-                      <span className="text-amber-400 font-bold flex items-center gap-1">
-                        <Zap className="w-3 h-3" /> Priority
+                  <div
+                    className="
+                      mt-4
+                      pt-3
+                      border-t
+                      border-[var(--border)]
+                      flex
+                      items-center
+                      justify-between
+                      text-[11px]
+                      text-[var(--muted)]
+                    "
+                  >
+                    <span>
+                      Attendant: {counter.staffName}
+                    </span>
+
+                    {servingToken?.priority ===
+                      'priority' && (
+                      <span
+                        className="
+                          text-amber-600
+                          dark:text-amber-300
+                          font-bold
+                          flex
+                          items-center
+                          gap-1
+                        "
+                      >
+                        <Zap className="w-3 h-3" />
+                        Priority
                       </span>
                     )}
                   </div>
@@ -273,120 +862,522 @@ export const LandingPage: React.FC = () => {
             })}
           </div>
 
-          {/* Up Next Preview Strip */}
-          <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800">
-            <div className="flex items-center justify-between text-xs mb-3">
-              <span className="font-semibold text-slate-300 flex items-center gap-2">
-                <Clock className="w-4 h-4 text-cyan-400" />
-                <span>Next in Queue ({waitingTokens.length} Waiting)</span>
+          {/* Queue strip */}
+
+          <div
+            className="
+              p-4
+              rounded-2xl
+              bg-[var(--card-soft)]
+              dark:bg-slate-950/60
+              border
+              border-[var(--border)]
+            "
+          >
+            <div
+              className="
+                flex
+                items-center
+                justify-between
+                text-xs
+                mb-3
+                gap-4
+              "
+            >
+              <span
+                className="
+                  font-semibold
+                  text-[var(--foreground)]
+                  flex
+                  items-center
+                  gap-2
+                "
+              >
+                <Clock
+                  className="
+                    w-4 h-4
+                    text-blue-600
+                    dark:text-blue-300
+                  "
+                />
+
+                <span>
+                  Next in Queue ({waitingTokens.length}{' '}
+                  Waiting)
+                </span>
               </span>
-              <span className="text-xs text-slate-400">Est. Clear Time: ~{analytics.estimatedTimeToClearMinutes} mins</span>
+
+              <span
+                className="
+                  text-xs
+                  text-[var(--muted)]
+                "
+              >
+                Est. Clear Time: ~
+                {analytics.estimatedTimeToClearMinutes}{' '}
+                mins
+              </span>
             </div>
 
             {waitingTokens.length === 0 ? (
-              <p className="text-xs text-slate-500 italic py-2 text-center">Queue is currently clear! Join to get token #1.</p>
+              <p
+                className="
+                  text-xs
+                  text-[var(--muted)]
+                  italic
+                  py-2
+                  text-center
+                "
+              >
+                Queue is currently clear! Join to get
+                token #1.
+              </p>
             ) : (
-              <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin">
-                {waitingTokens.slice(0, 6).map((token, index) => (
-                  <div
-                    key={token.id}
-                    className={`shrink-0 flex items-center gap-2 px-3 py-2 rounded-lg border text-xs ${
-                      token.priority === 'priority'
-                        ? 'bg-amber-950/30 border-amber-500/40 text-amber-200'
-                        : 'bg-slate-800/80 border-slate-700 text-slate-200'
-                    }`}
-                  >
-                    <span className="w-5 h-5 rounded-full bg-slate-700 flex items-center justify-center font-bold text-[10px] text-slate-300">
-                      #{index + 1}
-                    </span>
-                    <div>
-                      <div className="flex items-center gap-1">
-                        <span className="font-bold font-mono text-white">{token.tokenNumber}</span>
-                        {token.priority === 'priority' && (
-                          <span className="text-[9px] px-1 bg-amber-500/20 text-amber-300 rounded font-bold">VIP</span>
-                        )}
+              <div
+                className="
+                  flex
+                  items-center
+                  gap-2
+                  overflow-x-auto
+                  pb-1
+                "
+              >
+                {waitingTokens
+                  .slice(0, 6)
+                  .map((token, index) => (
+                    <div
+                      key={token.id}
+                      className={`
+                        shrink-0
+                        flex
+                        items-center
+                        gap-2
+                        px-3 py-2
+                        rounded-xl
+                        border
+                        text-xs
+                        ${
+                          token.priority === 'priority'
+                            ? `
+                              bg-amber-50
+                              dark:bg-amber-500/10
+                              border-amber-200
+                              dark:border-amber-500/25
+                              text-amber-700
+                              dark:text-amber-200
+                            `
+                            : `
+                              bg-white
+                              dark:bg-slate-800
+                              border-[var(--border)]
+                              text-[var(--foreground)]
+                            `
+                        }
+                      `}
+                    >
+                      <span
+                        className="
+                          w-5 h-5
+                          rounded-full
+                          bg-blue-50
+                          dark:bg-slate-700
+                          flex
+                          items-center
+                          justify-center
+                          font-bold
+                          text-[10px]
+                          text-blue-700
+                          dark:text-slate-300
+                        "
+                      >
+                        #{index + 1}
+                      </span>
+
+                      <div>
+                        <div className="flex items-center gap-1">
+                          <span
+                            className="
+                              font-boldfont-mono
+                            "
+                          >
+                            {token.tokenNumber}
+                          </span>
+
+                          {token.priority ===
+                            'priority' && (
+                            <span
+                              className="
+                                text-[9px]
+                                px-1
+                                bg-amber-100
+                                dark:bg-amber-500/20
+                                text-amber-700
+                                dark:text-amber-300
+                                rounded
+                                font-bold
+                              "
+                            >
+                              VIP
+                            </span>
+                          )}
+                        </div>
+
+                        <p
+                          className="
+                            text-[10px]
+                            text-[var(--muted)]
+                            truncate
+                            max-w-[90px]
+                          "
+                        >
+                          {token.customerName}
+                        </p>
                       </div>
-                      <p className="text-[10px] text-slate-400 truncate max-w-[90px]">{token.customerName}</p>
+
+                      <span
+                        className="
+                          text-[10px]
+                          text-blue-700
+                          dark:text-blue-300
+                          font-mono
+                          pl-1
+                        "
+                      >
+                        ~{token.estimatedWaitMinutes}m
+                      </span>
                     </div>
-                    <span className="text-[10px] text-cyan-400 font-mono pl-1">~{token.estimatedWaitMinutes}m</span>
-                  </div>
-                ))}
+                  ))}
               </div>
             )}
           </div>
         </div>
       </section>
 
-      {/* How It Works Section */}
+      {/* =====================================================
+          HOW IT WORKS
+      ====================================================== */}
+
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-2xl mx-auto space-y-3 mb-12">
-          <span className="text-xs font-bold uppercase tracking-wider text-indigo-400 bg-indigo-500/10 px-3 py-1 rounded-full border border-indigo-500/20">
+
+        <div
+          className="
+            text-center
+            max-w-2xl
+            mx-auto
+            space-y-3
+            mb-12
+          "
+        >
+          <span
+            className="
+              text-xs
+              font-bold
+              uppercase
+              tracking-wider
+              text-blue-700
+              dark:text-blue-300
+              bg-blue-50
+              dark:bg-blue-500/10
+              px-3 py-1
+              rounded-full
+              border
+              border-blue-200
+              dark:border-blue-500/20
+            "
+          >
             Frictionless Flow
           </span>
-          <h2 className="text-3xl font-extrabold text-white tracking-tight">How SmartQueue AI Works</h2>
-          <p className="text-sm text-slate-400 leading-relaxed">
-            Eliminate chaotic physical queues with a three-step intelligent digital pipeline designed for rapid turnaround.
+
+          <h2
+            className="
+              text-3xl
+              font-extrabold
+              text-[var(--foreground)]
+              tracking-tight
+            "
+          >
+            How SmartQueue AI Works
+          </h2>
+
+          <p
+            className="
+              text-sm
+              text-[var(--muted)]
+              leading-relaxed
+            "
+          >
+            Eliminate chaotic physical queues with a
+            three-step intelligent digital pipeline designed
+            for rapid turnaround.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div
+          className="
+            grid
+            grid-cols-1
+            md:grid-cols-3
+            gap-6
+          "
+        >
           {steps.map((step) => {
             const Icon = step.icon;
+            const style = accentStyles[step.accent];
+
             return (
               <div
                 key={step.step}
-                className="relative p-6 sm:p-7 rounded-2xl bg-slate-900/90 border border-slate-800 hover:border-slate-700 transition-all group shadow-lg"
+                className="
+                  relative
+                  p-6 sm:p-7
+                  rounded-2xl
+                  bg-white
+                  dark:bg-slate-900/80
+                  border
+                  border-[var(--border)]
+                  hover:-translate-y-1
+                  hover:shadow-xl
+                  hover:shadow-blue-900/5
+                  transition-all
+                  group
+                "
               >
-                <div className="flex items-center justify-between mb-5">
-                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-tr ${step.color} p-0.5 shadow-md`}>
-                    <div className="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center">
-                      <Icon className="w-5 h-5 text-white group-hover:scale-110 transition-transform" />
-                    </div>
+                <div
+                  className="
+                    flex
+                    items-center
+                    justify-between
+                    mb-5
+                  "
+                >
+                  <div
+                    className={`
+                      w-12 h-12
+                      rounded-xl
+                      border
+                      flex
+                      items-center
+                      justify-center
+                      ${style.bgLight}
+                      dark:${style.bgDark}
+                      ${style.borderLight}
+                      dark:${style.borderDark}
+                    `}
+                  >
+                    <Icon
+                      className={`
+                        w-5 h-5
+                        ${style.iconLight}
+                        dark:${style.iconDark}
+                        group-hover:scale-110
+                        transition-transform
+                      `}
+                    />
                   </div>
-                  <span className="text-2xl font-black font-mono text-slate-700">{step.step}</span>
+
+                  <span
+                    className="
+                      text-2xl
+                      font-black
+                      font-mono
+                      text-blue-300
+                      dark:text-slate-700
+                    "
+                  >
+                    {step.step}
+                  </span>
                 </div>
-                <h3 className="text-base font-bold text-white mb-2">{step.title}</h3>
-                <p className="text-xs text-slate-400 leading-relaxed">{step.description}</p>
+
+                <h3
+                  className="
+                    text-base
+                    font-bold
+                    text-[var(--foreground)]
+                    mb-2
+                  "
+                >
+                  {step.title}
+                </h3>
+
+                <p
+                  className="
+                    text-xs
+                    text-[var(--muted)]
+                    leading-relaxed
+                  "
+                >
+                  {step.description}
+                </p>
               </div>
             );
           })}
         </div>
       </section>
 
-      {/* Industry Solutions / Use Cases */}
+      {/* =====================================================
+          INDUSTRIES
+      ====================================================== */}
+
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="p-8 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 space-y-8">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+
+        <div
+          className="
+            p-8
+            rounded-3xl
+            bg-white
+            dark:bg-slate-900/80
+            border
+            border-[var(--border)]
+            space-y-8
+            shadow-lg
+            shadow-blue-900/5
+          "
+        >
+          <div
+            className="
+              flex
+              flex-col
+              md:flex-row
+              md:items-end
+              justify-between
+              gap-4
+            "
+          >
             <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-cyan-400 bg-cyan-500/10 px-3 py-1 rounded-full border border-cyan-500/20">
+              <span
+                className="
+                  text-xs
+                  font-bold
+                  uppercase
+                  tracking-wider
+                  text-sky-700
+                  dark:text-sky-300
+                  bg-sky-50
+                  dark:bg-sky-500/10
+                  px-3 py-1
+                  rounded-full
+                  border
+                  border-sky-200
+                  dark:border-sky-500/20
+                "
+              >
                 Built For Every High-Traffic Venue
               </span>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mt-2">
+
+              <h2
+                className="
+                  text-2xl
+                  sm:text-3xl
+                  font-extrabold
+                  text-[var(--foreground)]
+                  tracking-tight
+                  mt-3
+                "
+              >
                 Tailored for Real-World Workflows
               </h2>
             </div>
-            <p className="text-xs text-slate-400 max-w-md">
-              From high-security financial counters to university fee halls and hospital triage centers, SmartQueue adapts to any service hierarchy.
+
+            <p
+              className="
+                text-xs
+                text-[var(--muted)]
+                max-w-md
+              "
+            >
+              From high-security financial counters to
+              university fee halls and hospital triage
+              centers, SmartQueue adapts to any service
+              hierarchy.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {industries.map((ind) => {
-              const Icon = ind.icon;
+          <div
+            className="
+              grid
+              grid-cols-1
+              sm:grid-cols-2
+              lg:grid-cols-3
+              gap-4
+            "
+          >
+            {industries.map((industry) => {
+              const Icon = industry.icon;
+              const style = accentStyles[industry.accent];
+
               return (
                 <div
-                  key={ind.name}
-                  className="p-4 rounded-xl bg-slate-900/60 border border-slate-800/80 hover:border-slate-700 transition-all flex items-start gap-3.5"
+                  key={industry.name}
+                  className="
+                    p-4
+                    rounded-2xl
+                    bg-[var(--card-soft)]
+                    dark:bg-slate-800/60
+                    border
+                    border-[var(--border)]
+                    hover:-translate-y-0.5
+                    hover:shadow-md
+                    transition-all
+                    flex
+                    items-start
+                    gap-3.5
+                  "
                 >
-                  <div className={`p-2.5 rounded-xl border ${ind.color} shrink-0`}>
-                    <Icon className="w-5 h-5" />
+                  <div
+                    className={`
+                      p-2.5
+                      rounded-xl
+                      border
+                      shrink-0
+                      ${style.bgLight}
+                      dark:${style.bgDark}
+                      ${style.borderLight}
+                      dark:${style.borderDark}
+                    `}
+                  >
+                    <Icon
+                      className={`
+                        w-5 h-5
+                        ${style.iconLight}
+                        dark:${style.iconDark}
+                      `}
+                    />
                   </div>
+
                   <div className="space-y-1">
-                    <h3 className="text-sm font-bold text-white">{ind.name}</h3>
-                    <p className="text-[11px] text-slate-400">{ind.subtitle}</p>
-                    <p className="text-[10px] text-emerald-400 font-semibold flex items-center gap-1 pt-1">
+                    <h3
+                      className="
+                        text-sm
+                        font-bold
+                        text-[var(--foreground)]
+                      "
+                    >
+                      {industry.name}
+                    </h3>
+
+                    <p
+                      className="
+                        text-[11px]
+                        text-[var(--muted)]
+                      "
+                    >
+                      {industry.subtitle}
+                    </p>
+
+                    <p
+                      className="
+                        text-[10px]
+                        text-emerald-700
+                        dark:text-emerald-300
+                        font-semibold
+                        flex
+                        items-center
+                        gap-1
+                        pt-1
+                      "
+                    >
                       <CheckCircle2 className="w-3 h-3 shrink-0" />
-                      <span>{ind.stat}</span>
+                      <span>{industry.stat}</span>
                     </p>
                   </div>
                 </div>
@@ -396,63 +1387,231 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Feature Highlights Grid */}
+      {/* =====================================================
+          FEATURE HIGHLIGHTS
+      ====================================================== */}
+
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="p-5 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
-            <BrainCircuit className="w-6 h-6 text-indigo-400" />
-            <h4 className="text-sm font-bold text-white">Dynamic AI Predictions</h4>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Considers historical desk velocity, priority loads, and active counter capacity to estimate exact wait times.
-            </p>
-          </div>
 
-          <div className="p-5 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
-            <Zap className="w-6 h-6 text-amber-400" />
-            <h4 className="text-sm font-bold text-white">Priority / VIP Lane</h4>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Dedicated fast-track queues for senior citizens, medical emergencies, faculty, and VIP clients.
-            </p>
-          </div>
+        <div
+          className="
+            grid
+            grid-cols-1
+            sm:grid-cols-2
+            lg:grid-cols-4
+            gap-4
+          "
+        >
+          {[
+            {
+              icon: BrainCircuit,
+              title: 'Dynamic AI Predictions',
+              text: 'Considers historical desk velocity, priority loads, and active counter capacity to estimate exact wait times.',
+              iconClass:
+                'text-blue-700 dark:text-blue-300',
+            },
+            {
+              icon: Zap,
+              title: 'Priority / VIP Lane',
+              text: 'Dedicated fast-track queues for senior citizens, medical emergencies, faculty, and VIP clients.',
+              iconClass:
+                'text-amber-700 dark:text-amber-300',
+            },
+            {
+              icon: BellRing,
+              title: 'Audio & Voice Synthesis',
+              text: 'Built-in audio synthesizer and Web Speech API announcement calls out tokens directly to public speakers.',
+              iconClass:
+                'text-sky-700 dark:text-sky-300',
+            },
+            {
+              icon: ShieldCheck,
+              title: 'Zero Backend Required',
+              text: 'Persisted instantly with local storage and tab synchronization, ensuring 100% uptime with zero setup.',
+              iconClass:
+                'text-emerald-700 dark:text-emerald-300',
+            },
+          ].map((feature) => {
+            const Icon = feature.icon;
 
-          <div className="p-5 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
-            <BellRing className="w-6 h-6 text-cyan-400" />
-            <h4 className="text-sm font-bold text-white">Audio & Voice Synthesis</h4>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Built-in audio synthesizer and Web Speech API announcement calls out tokens directly to public speakers.
-            </p>
-          </div>
+            return (
+              <div
+                key={feature.title}
+                className="
+                  p-5
+                  rounded-2xl
+                  bg-white
+                  dark:bg-slate-900/80
+                  border
+                  border-[var(--border)]
+                  space-y-3
+                  hover:-translate-y-1
+                  hover:shadow-lg
+                  hover:shadow-blue-900/5
+                  transition-all
+                "
+              >
+                <Icon
+                  className={`
+                    w-6 h-6
+                    ${feature.iconClass}
+                  `}
+                />
 
-          <div className="p-5 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
-            <ShieldCheck className="w-6 h-6 text-emerald-400" />
-            <h4 className="text-sm font-bold text-white">Zero Backend Required</h4>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Persisted instantly with local storage and tab synchronization, ensuring 100% uptime with zero setup.
-            </p>
-          </div>
+                <h4
+                  className="
+                    text-sm
+                    font-bold
+                    text-[var(--foreground)]
+                  "
+                >
+                  {feature.title}
+                </h4>
+
+                <p
+                  className="
+                    text-xs
+                    text-[var(--muted)]
+                    leading-relaxed
+                  "
+                >
+                  {feature.text}
+                </p>
+              </div>
+            );
+          })}
         </div>
       </section>
 
-      {/* Bottom CTA Banner */}
+      {/* =====================================================
+          BOTTOM CTA
+      ====================================================== */}
+
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="p-8 sm:p-10 rounded-2xl bg-gradient-to-r from-indigo-900/60 via-blue-900/40 to-slate-900 border border-indigo-500/30 text-center space-y-5 shadow-2xl relative overflow-hidden">
-          <div className="absolute -right-10 -bottom-10 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-            Ready to experience frictionless queue management?
+
+        <div
+          className="
+            relative
+            overflow-hidden
+            p-8
+            sm:p-10
+            rounded-3xl
+            bg-gradient-to-br
+            from-[#17324d]
+            via-[#244d6d]
+            to-[#397ca8]
+            dark:from-[#0d2135]
+            dark:via-[#123653]
+            dark:to-[#173b55]
+            border
+            border-blue-300/20
+            text-center
+            space-y-5
+            shadow-2xl
+          "
+        >
+          <div
+            className="
+              absolute
+              -right-16
+              -bottom-20
+              w-72
+              h-72
+              rounded-full
+              bg-sky-300/15
+              blur-3xl
+              pointer-events-none
+            "
+          />
+
+          <div
+            className="
+              relative
+              inline-flex
+              items-center
+              justify-center
+              w-12
+              h-12
+              rounded-2xl
+              bg-white/10
+              border
+              border-white/15
+            "
+          >
+            <Radio className="w-6 h-6 text-sky-200" />
+          </div>
+
+          <h2
+            className="
+              relative
+              text-2xl
+              sm:text-3xl
+              font-extrabold
+              text-white
+              tracking-tight
+            "
+          >
+            Ready to experience frictionless queue
+            management?
           </h2>
-          <p className="text-sm text-slate-300 max-w-xl mx-auto">
-            Test the live customer token experience or jump right into the multi-desk staff controller.
+
+          <p
+            className="
+              relative
+              text-sm
+              text-blue-100/80
+              max-w-xl
+              mx-auto
+            "
+          >
+            Test the live customer token experience or
+            jump right into the multi-desk staff controller.
           </p>
-          <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+
+          <div
+            className="
+              relative
+              flex
+              flex-wrap
+              items-center
+              justify-center
+              gap-3
+              pt-2
+            "
+          >
             <button
               onClick={() => setActiveTab('join')}
-              className="px-6 py-3 rounded-xl bg-white text-slate-950 hover:bg-slate-100 font-bold text-sm shadow-xl transition-all cursor-pointer"
+              className="
+                px-6 py-3
+                rounded-xl
+                bg-white
+                text-[#17324d]
+                hover:bg-blue-50
+                font-bold
+                text-sm
+                shadow-xl
+                transition-all
+                hover:-translate-y-0.5
+              "
             >
               Get Your Digital Token
             </button>
+
             <button
               onClick={() => setActiveTab('admin')}
-              className="px-6 py-3 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-white font-semibold text-sm border border-slate-600 transition-all cursor-pointer"
+              className="
+                px-6 py-3
+                rounded-xl
+                bg-white/10
+                hover:bg-white/15
+                text-white
+                font-semibold
+                text-sm
+                border
+                border-white/20
+                transition-all
+                hover:-translate-y-0.5
+              "
             >
               Open Staff Admin Desk
             </button>

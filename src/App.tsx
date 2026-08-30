@@ -10,15 +10,27 @@ import { AnalyticsView } from './components/AnalyticsView';
 import { ToastContainer } from './components/ToastContainer';
 import { RunInstructionsModal } from './components/RunInstructionsModal';
 import { Footer } from './components/Footer';
+import { ThemeProvider } from './context/ThemeContext';
 
 const AppContent: React.FC = () => {
   const { activeTab } = useQueue();
   const [instructionsOpen, setInstructionsOpen] = useState(false);
 
-  // If Kiosk / TV mode is active, render full-screen immersive display
+  // Kiosk / TV mode
   if (activeTab === 'kiosk') {
     return (
-      <main className="min-h-screen bg-slate-950 text-slate-100 selection:bg-cyan-500 selection:text-black">
+      <main
+        className="
+          w-full
+          max-w-full
+          min-h-screen
+          overflow-x-hidden
+          bg-[var(--background)]
+          text-[var(--foreground)]
+          selection:bg-blue-500
+          selection:text-white
+        "
+      >
         <LiveQueueDisplay isKioskMode={true} />
         <ToastContainer />
       </main>
@@ -26,30 +38,71 @@ const AppContent: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col justify-between bg-slate-950 text-slate-100 selection:bg-indigo-500 selection:text-white">
-      <div>
-        <Navbar onOpenInstructions={() => setInstructionsOpen(true)} />
-        <main className="w-full">
+    <div
+      className="
+        w-full
+        max-w-full
+        min-h-screen
+        flex
+        flex-col
+        bg-[var(--background)]
+        text-[var(--foreground)]
+        transition-colors
+        duration-300
+        overflow-x-hidden
+        selection:bg-blue-500
+        selection:text-white
+      "
+    >
+      <div className="w-full max-w-full min-w-0 overflow-x-hidden">
+        <Navbar
+          onOpenInstructions={() => setInstructionsOpen(true)}
+        />
+
+        <main
+          className="
+            w-full
+            max-w-full
+            min-w-0
+            overflow-x-hidden
+          "
+        >
           {activeTab === 'landing' && <LandingPage />}
+
           {activeTab === 'join' && <JoinQueueView />}
-          {activeTab === 'live' && <LiveQueueDisplay isKioskMode={false} />}
+
+          {activeTab === 'live' && (
+            <LiveQueueDisplay isKioskMode={false} />
+          )}
+
           {activeTab === 'admin' && <AdminDashboard />}
+
           {activeTab === 'insights' && <AIInsightsView />}
+
           {activeTab === 'analytics' && <AnalyticsView />}
         </main>
       </div>
 
-      <Footer onOpenInstructions={() => setInstructionsOpen(true)} />
+      <Footer
+        onOpenInstructions={() => setInstructionsOpen(true)}
+      />
+
       <ToastContainer />
-      <RunInstructionsModal isOpen={instructionsOpen} onClose={() => setInstructionsOpen(false)} />
+
+      <RunInstructionsModal
+        isOpen={instructionsOpen}
+        onClose={() => setInstructionsOpen(false)}
+      />
     </div>
   );
 };
 
 export default function App() {
   return (
-    <QueueProvider>
-      <AppContent />
-    </QueueProvider>
+    <ThemeProvider>
+      <QueueProvider>
+        <AppContent />
+      </QueueProvider>
+    </ThemeProvider>
   );
 }

@@ -8,22 +8,35 @@ import {
   CheckCircle2,
   Zap,
   Download,
-  Calendar,
   Layers,
-  ArrowUpRight,
   Sparkles,
 } from 'lucide-react';
 
 export const AnalyticsView: React.FC = () => {
-  const { analytics, tokens, counters, services, addToast } = useQueue();
+  const {
+    analytics,
+    tokens,
+    services,
+    addToast,
+  } = useQueue();
 
   const handleExportCSV = () => {
     try {
-      const headers = ['Token Number', 'Customer Name', 'Service', 'Priority', 'Status', 'Joined Time', 'Wait Minutes', 'Assigned Counter'];
+      const headers = [
+        'Token Number',
+        'Customer Name',
+        'Service',
+        'Priority',
+        'Status',
+        'Joined Time',
+        'Wait Minutes',
+        'Assigned Counter',
+      ];
+
       const rows = tokens.map((t) => [
         t.tokenNumber,
         `"${t.customerName.replace(/"/g, '""')}"`,
-        `"${t.serviceName}"`,
+        `"${t.serviceName.replace(/"/g, '""')}"`,
         t.priority,
         t.status,
         new Date(t.joinedAt).toLocaleTimeString(),
@@ -31,275 +44,501 @@ export const AnalyticsView: React.FC = () => {
         t.assignedCounter || 'N/A',
       ]);
 
-      const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((e) => e.join(','))].join('\n');
+      const csvContent =
+        'data:text/csv;charset=utf-8,' +
+        [
+          headers.join(','),
+          ...rows.map((row) => row.join(',')),
+        ].join('\n');
+
       const encodedUri = encodeURI(csvContent);
       const link = document.createElement('a');
+
       link.setAttribute('href', encodedUri);
-      link.setAttribute('download', `smartqueue_report_${new Date().toISOString().slice(0, 10)}.csv`);
+      link.setAttribute(
+        'download',
+        `smartqueue_report_${new Date()
+          .toISOString()
+          .slice(0, 10)}.csv`
+      );
+
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
 
-      addToast('CSV Exported', 'Downloaded queue performance report.', 'success');
+      addToast(
+        'CSV Exported',
+        'Downloaded queue performance report.',
+        'success'
+      );
     } catch {
-      addToast('Export Error', 'Could not generate CSV file.', 'warning');
+      addToast(
+        'Export Error',
+        'Could not generate CSV file.',
+        'warning'
+      );
     }
   };
 
   const handleExportJSON = () => {
     try {
-      const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify({ analytics, tokens, counters }, null, 2));
+      const dataStr =
+        'data:text/json;charset=utf-8,' +
+        encodeURIComponent(
+          JSON.stringify(
+            {
+              analytics,
+              tokens,
+            },
+            null,
+            2
+          )
+        );
+
       const link = document.createElement('a');
+
       link.setAttribute('href', dataStr);
-      link.setAttribute('download', `smartqueue_analytics_${Date.now()}.json`);
+      link.setAttribute(
+        'download',
+        `smartqueue_analytics_${Date.now()}.json`
+      );
+
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
 
-      addToast('JSON Exported', 'Full dataset exported successfully.', 'success');
+      addToast(
+        'JSON Exported',
+        'Full dataset exported successfully.',
+        'success'
+      );
     } catch {
-      addToast('Export Error', 'Could not export JSON.', 'warning');
+      addToast(
+        'Export Error',
+        'Could not export JSON.',
+        'warning'
+      );
     }
   };
 
+  const maxHourlyValue = Math.max(
+    1,
+    ...analytics.hourlyTraffic.map((item) =>
+      Math.max(item.joined, item.served, 1)
+    )
+  );
+
+  const priorityPercentage = Math.max(
+    0,
+    Math.min(100, analytics.priorityPercentage)
+  );
+
+  const priorityBarPercentage = Math.max(
+    10,
+    priorityPercentage
+  );
+
+  const standardBarPercentage = Math.max(
+    0,
+    100 - priorityBarPercentage
+  );
+
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 space-y-8 animate-in fade-in duration-300">
-      {/* Header & Export Tools */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-purple-500 to-indigo-600 p-0.5 shadow-md">
-              <div className="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center">
-                <BarChart3 className="w-5 h-5 text-purple-400" />
-              </div>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-              Queue Analytics & Performance
-            </h1>
-          </div>
-          <p className="text-xs text-slate-400 mt-1">
-            Historical wait time trends, customer throughput velocity, and service categorization metrics.
-          </p>
-        </div>
+    <div className="w-full min-w-0 overflow-x-hidden">
+      <div className="mx-auto w-full max-w-7xl min-w-0 px-3 py-5 sm:px-5 sm:py-7 lg:px-6 lg:py-8">
 
-        <div className="flex items-center gap-2.5">
-          <button
-            onClick={handleExportCSV}
-            className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-md"
-          >
-            <Download className="w-3.5 h-3.5 text-cyan-400" />
-            <span>Export CSV</span>
-          </button>
+        {/* =====================================================
+            HEADER
+        ====================================================== */}
+        <section className="mb-6 overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--card)] shadow-xl">
+          <div className="bg-gradient-to-r from-[#163a5f] via-[#163a5f] to-[#315b87] dark:from-[#0d213a] dark:via-[#0d213a] dark:to-[#173b5d] px-5 py-6 text-white sm:px-7">
+            <div className="flex min-w-0 flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
 
-          <button
-            onClick={handleExportJSON}
-            className="px-3.5 py-2 rounded-xl bg-indigo-600/30 hover:bg-indigo-600/50 border border-indigo-500/40 text-indigo-200 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-md"
-          >
-            <Download className="w-3.5 h-3.5 text-indigo-400" />
-            <span>Export Raw JSON</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Top 6 KPI Metric Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
-        <div className="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 text-center space-y-1">
-          <CheckCircle2 className="w-4 h-4 text-emerald-400 mx-auto" />
-          <p className="text-2xl font-black font-mono text-white">{analytics.totalServedToday}</p>
-          <p className="text-[10px] uppercase font-bold text-slate-400">Served Today</p>
-        </div>
-
-        <div className="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 text-center space-y-1">
-          <Clock className="w-4 h-4 text-cyan-400 mx-auto" />
-          <p className="text-2xl font-black font-mono text-cyan-400">{analytics.avgWaitTimeMinutes}m</p>
-          <p className="text-[10px] uppercase font-bold text-slate-400">Avg Wait Time</p>
-        </div>
-
-        <div className="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 text-center space-y-1">
-          <TrendingUp className="w-4 h-4 text-indigo-400 mx-auto" />
-          <p className="text-2xl font-black font-mono text-indigo-300">{analytics.avgServiceTimeMinutes}m</p>
-          <p className="text-[10px] uppercase font-bold text-slate-400">Avg Service Time</p>
-        </div>
-
-        <div className="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 text-center space-y-1">
-          <Users className="w-4 h-4 text-purple-400 mx-auto" />
-          <p className="text-2xl font-black font-mono text-purple-300">{analytics.peakQueueSize}</p>
-          <p className="text-[10px] uppercase font-bold text-slate-400">Peak Queue Size</p>
-        </div>
-
-        <div className="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 text-center space-y-1">
-          <Zap className="w-4 h-4 text-amber-400 mx-auto" />
-          <p className="text-2xl font-black font-mono text-amber-300">{analytics.priorityPercentage}%</p>
-          <p className="text-[10px] uppercase font-bold text-slate-400">Priority Ratio</p>
-        </div>
-
-        <div className="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 text-center space-y-1">
-          <Sparkles className="w-4 h-4 text-rose-400 mx-auto" />
-          <p className="text-2xl font-black font-mono text-rose-300">{analytics.totalSkipped}</p>
-          <p className="text-[10px] uppercase font-bold text-slate-400">Skipped / No-Show</p>
-        </div>
-      </div>
-
-      {/* Main Charts & Visualizations Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Hourly Traffic Chart (7 cols) */}
-        <div className="lg:col-span-7 p-6 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-xl space-y-6">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-            <div>
-              <h2 className="text-sm font-bold uppercase tracking-wider text-white">
-                Hourly Queue Traffic & Throughput
-              </h2>
-              <p className="text-xs text-slate-400">Arrivals vs completed attendees per hour</p>
-            </div>
-            <span className="text-xs text-indigo-400 font-mono">Today's Cycle</span>
-          </div>
-
-          {/* Bar Histogram Chart */}
-          <div className="h-48 flex items-end justify-between gap-4 pt-6 pb-2 px-2">
-            {analytics.hourlyTraffic.map((item, idx) => {
-              const maxVal = Math.max(...analytics.hourlyTraffic.map((h) => Math.max(h.joined, h.served, 1)));
-              const joinedHeight = Math.max(12, (item.joined / maxVal) * 100);
-              const servedHeight = Math.max(8, (item.served / maxVal) * 100);
-
-              return (
-                <div key={idx} className="flex-1 flex flex-col items-center gap-2 group">
-                  <div className="w-full flex items-end justify-center gap-1.5 h-36">
-                    {/* Joined bar */}
-                    <div
-                      className="w-1/2 rounded-t-md bg-gradient-to-t from-indigo-600 to-cyan-400 transition-all duration-500 group-hover:brightness-125 relative"
-                      style={{ height: `${joinedHeight}%` }}
-                    >
-                      <span className="absolute -top-5 left-1/2 -translate-x-1/2 text-[9px] font-mono font-bold text-cyan-300 opacity-0 group-hover:opacity-100 transition-opacity">
-                        {item.joined}
-                      </span>
-                    </div>
-
-                    {/* Served bar */}
-                    <div
-                      className="w-1/2 rounded-t-md bg-gradient-to-t from-emerald-600 to-teal-400 transition-all duration-500 group-hover:brightness-125 relative"
-                      style={{ height: `${servedHeight}%` }}
-                    >
-                      <span className="absolute -top-5 left-1/2 -translate-x-1/2 text-[9px] font-mono font-bold text-emerald-300 opacity-0 group-hover:opacity-100 transition-opacity">
-                        {item.served}
-                      </span>
-                    </div>
+              <div className="min-w-0">
+                <div className="mb-2 flex min-w-0 items-center gap-2.5">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white/10 backdrop-blur-sm">
+                    <BarChart3 className="h-5 w-5 text-blue-200" />
                   </div>
 
-                  <span className="text-[10px] font-mono text-slate-400 whitespace-nowrap">
-                    {item.hour}
-                  </span>
+                  <h1 className="truncate text-xl font-black tracking-tight sm:text-2xl lg:text-3xl">
+                    Queue Analytics & Performance
+                  </h1>
                 </div>
-              );
-            })}
+
+                <p className="max-w-3xl text-xs leading-relaxed text-blue-100/80 sm:text-sm">
+                  Historical wait time trends, customer throughput velocity,
+                  and service categorization metrics.
+                </p>
+              </div>
+
+              {/* EXPORT ACTIONS */}
+              <div className="flex min-w-0 flex-wrap gap-2">
+                <button
+                  onClick={handleExportCSV}
+                  className="flex shrink-0 items-center justify-center gap-1.5 rounded-xl border border-white/15 bg-white/10 px-3.5 py-2.5 text-xs font-bold text-white backdrop-blur-sm transition-all hover:bg-white/20"
+                >
+                  <Download className="h-3.5 w-3.5 text-blue-200" />
+                  <span>Export CSV</span>
+                </button>
+
+                <button
+                  onClick={handleExportJSON}
+                  className="flex shrink-0 items-center justify-center gap-1.5 rounded-xl border border-cyan-200/20 bg-cyan-300/10 px-3.5 py-2.5 text-xs font-bold text-cyan-100 transition-all hover:bg-cyan-300/20"
+                >
+                  <Download className="h-3.5 w-3.5 text-cyan-200" />
+                  <span>Export Raw JSON</span>
+                </button>
+              </div>
+            </div>
           </div>
+        </section>
 
-          <div className="flex items-center justify-center gap-6 pt-2 border-t border-slate-800 text-xs text-slate-400">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded bg-indigo-500" />
-              <span>Visitor Arrivals</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded bg-emerald-500" />
-              <span>Tokens Served</span>
-            </div>
-          </div>
-        </div>
+        {/* =====================================================
+            KPI CARDS
+        ====================================================== */}
+        <section className="mb-6 grid min-w-0 grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
 
-        {/* Priority vs Normal Donut / Distribution (5 cols) */}
-        <div className="lg:col-span-5 p-6 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-xl space-y-6">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-            <div>
-              <h2 className="text-sm font-bold uppercase tracking-wider text-white">
-                Priority vs Standard Load
-              </h2>
-              <p className="text-xs text-slate-400">VIP priority traffic ratio</p>
-            </div>
-            <span className="text-xs text-amber-400 font-mono">{analytics.priorityPercentage}% VIP</span>
-          </div>
+          <div className="min-w-0 rounded-2xl border border-[var(--border)] bg-[var(--card)] p-4 text-center shadow-md">
+            <CheckCircle2 className="mx-auto h-4 w-4 text-emerald-500" />
 
-          {/* Graphical Split Card */}
-          <div className="space-y-4 py-2">
-            {/* Visual ratio bar */}
-            <div className="h-6 w-full rounded-xl bg-slate-950 overflow-hidden flex border border-slate-800">
-              <div
-                className="h-full bg-gradient-to-r from-amber-500 to-orange-500 transition-all duration-700 flex items-center justify-center text-[10px] font-bold text-black"
-                style={{ width: `${Math.max(10, analytics.priorityPercentage)}%` }}
-              >
-                {analytics.priorityPercentage > 15 ? `${analytics.priorityPercentage}% VIP` : ''}
-              </div>
-              <div
-                className="h-full bg-gradient-to-r from-indigo-600 to-blue-600 transition-all duration-700 flex items-center justify-center text-[10px] font-bold text-white"
-                style={{ width: `${100 - Math.max(10, analytics.priorityPercentage)}%` }}
-              >
-                {100 - analytics.priorityPercentage}% Standard
-              </div>
-            </div>
+            <p className="mt-2 truncate font-mono text-2xl font-black text-[var(--foreground)]">
+              {analytics.totalServedToday}
+            </p>
 
-            <div className="grid grid-cols-2 gap-3 pt-2">
-              <div className="p-3.5 rounded-2xl bg-amber-950/20 border border-amber-500/30 space-y-1">
-                <span className="text-[10px] uppercase font-bold text-amber-400 flex items-center gap-1">
-                  <Zap className="w-3 h-3" /> Priority VIP
-                </span>
-                <p className="text-xl font-black font-mono text-white">{analytics.priorityCount}</p>
-                <p className="text-[10px] text-slate-400">Avg turnaround ~4 mins</p>
-              </div>
-
-              <div className="p-3.5 rounded-2xl bg-blue-950/20 border border-blue-500/30 space-y-1">
-                <span className="text-[10px] uppercase font-bold text-blue-400 flex items-center gap-1">
-                  <Users className="w-3 h-3" /> Standard Lane
-                </span>
-                <p className="text-xl font-black font-mono text-white">{analytics.normalCount}</p>
-                <p className="text-[10px] text-slate-400">Avg turnaround ~11 mins</p>
-              </div>
-            </div>
-
-            <p className="text-[11px] text-slate-400 leading-relaxed pt-1">
-              Priority tokens are prioritized at desk dispatching while maintaining fair distribution for standard walk-ins.
+            <p className="mt-1 truncate text-[10px] font-bold uppercase tracking-wide text-[var(--muted)]">
+              Served Today
             </p>
           </div>
-        </div>
-      </div>
 
-      {/* Service-Wise Breakdown Table & Performance */}
-      <div className="p-6 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-xl space-y-5">
-        <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-          <div>
-            <h2 className="text-sm font-bold uppercase tracking-wider text-white flex items-center gap-2">
-              <Layers className="w-4 h-4 text-cyan-400" />
-              <span>Service-Wise Distribution & Demand</span>
-            </h2>
-            <p className="text-xs text-slate-400">Volume and average handling duration by category</p>
+          <div className="min-w-0 rounded-2xl border border-[var(--border)] bg-[var(--card)] p-4 text-center shadow-md">
+            <Clock className="mx-auto h-4 w-4 text-cyan-500" />
+
+            <p className="mt-2 truncate font-mono text-2xl font-black text-cyan-500">
+              {analytics.avgWaitTimeMinutes}m
+            </p>
+
+            <p className="mt-1 truncate text-[10px] font-bold uppercase tracking-wide text-[var(--muted)]">
+              Avg Wait Time
+            </p>
           </div>
-          <span className="text-xs text-slate-400">{services.length} Service Categories</span>
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {analytics.serviceDistribution.map((srv) => (
-            <div
-              key={srv.serviceId}
-              className="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 hover:border-slate-700 transition-all space-y-3"
-            >
-              <div className="flex items-center justify-between">
-                <h3 className="text-xs font-bold text-white truncate">{srv.serviceName}</h3>
-                <span className="text-xs font-mono font-black text-cyan-400">{srv.count} Tokens</span>
+          <div className="min-w-0 rounded-2xl border border-[var(--border)] bg-[var(--card)] p-4 text-center shadow-md">
+            <TrendingUp className="mx-auto h-4 w-4 text-indigo-500" />
+
+            <p className="mt-2 truncate font-mono text-2xl font-black text-indigo-500">
+              {analytics.avgServiceTimeMinutes}m
+            </p>
+
+            <p className="mt-1 truncate text-[10px] font-bold uppercase tracking-wide text-[var(--muted)]">
+              Avg Service Time
+            </p>
+          </div>
+
+          <div className="min-w-0 rounded-2xl border border-[var(--border)] bg-[var(--card)] p-4 text-center shadow-md">
+            <Users className="mx-auto h-4 w-4 text-purple-500" />
+
+            <p className="mt-2 truncate font-mono text-2xl font-black text-purple-500">
+              {analytics.peakQueueSize}
+            </p>
+
+            <p className="mt-1 truncate text-[10px] font-bold uppercase tracking-wide text-[var(--muted)]">
+              Peak Queue Size
+            </p>
+          </div>
+
+          <div className="min-w-0 rounded-2xl border border-[var(--border)] bg-[var(--card)] p-4 text-center shadow-md">
+            <Zap className="mx-auto h-4 w-4 text-amber-500" />
+
+            <p className="mt-2 truncate font-mono text-2xl font-black text-amber-500">
+              {analytics.priorityPercentage}%
+            </p>
+
+            <p className="mt-1 truncate text-[10px] font-bold uppercase tracking-wide text-[var(--muted)]">
+              Priority Ratio
+            </p>
+          </div>
+
+          <div className="min-w-0 rounded-2xl border border-[var(--border)] bg-[var(--card)] p-4 text-center shadow-md">
+            <Sparkles className="mx-auto h-4 w-4 text-rose-500" />
+
+            <p className="mt-2 truncate font-mono text-2xl font-black text-rose-500">
+              {analytics.totalSkipped}
+            </p>
+
+            <p className="mt-1 truncate text-[10px] font-bold uppercase tracking-wide text-[var(--muted)]">
+              Skipped / No-Show
+            </p>
+          </div>
+        </section>
+
+        {/* =====================================================
+            CHARTS
+        ====================================================== */}
+        <section className="mb-6 grid min-w-0 grid-cols-1 gap-5 lg:grid-cols-12">
+
+          {/* HOURLY TRAFFIC */}
+          <div className="min-w-0 overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--card)] p-5 shadow-xl sm:p-6 lg:col-span-7">
+
+            <div className="mb-5 flex min-w-0 flex-col gap-2 border-b border-[var(--border)] pb-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="min-w-0">
+                <h2 className="truncate text-sm font-bold uppercase tracking-wider text-[var(--foreground)]">
+                  Hourly Queue Traffic & Throughput
+                </h2>
+
+                <p className="mt-1 text-[10px] text-[var(--muted)] sm:text-xs">
+                  Arrivals vs completed attendees per hour
+                </p>
               </div>
 
-              {/* Progress Bar */}
-              <div className="space-y-1">
-                <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
-                  <div
-                    className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-cyan-400 transition-all duration-500"
-                    style={{ width: `${Math.max(5, srv.percentage)}%` }}
-                  />
-                </div>
-                <div className="flex items-center justify-between text-[10px] text-slate-400 font-mono">
-                  <span>{srv.percentage}% of total</span>
-                  <span>~{srv.avgWaitMinutes}m avg wait</span>
-                </div>
+              <span className="shrink-0 font-mono text-[10px] text-indigo-500 sm:text-xs">
+                Today's Cycle
+              </span>
+            </div>
+
+            {/* HISTOGRAM */}
+            <div className="h-56 w-full min-w-0 overflow-hidden">
+
+              <div className="flex h-44 min-w-0 items-end gap-1.5 px-1 sm:gap-2 sm:px-2">
+                {analytics.hourlyTraffic.map((item, idx) => {
+                  const joinedHeight = Math.max(
+                    10,
+                    (item.joined / maxHourlyValue) * 100
+                  );
+
+                  const servedHeight = Math.max(
+                    8,
+                    (item.served / maxHourlyValue) * 100
+                  );
+
+                  return (
+                    <div
+                      key={idx}
+                      className="group flex min-w-0 flex-1 flex-col items-center"
+                    >
+                      <div className="flex h-36 w-full items-end justify-center gap-0.5 sm:gap-1">
+
+                        <div
+                          className="relative w-1/2 rounded-t-md bg-gradient-to-t from-indigo-600 to-cyan-400 transition-all duration-500 group-hover:brightness-110"
+                          style={{
+                            height: `${joinedHeight}%`,
+                          }}
+                        >
+                          <span className="absolute -top-5 left-1/2 hidden -translate-x-1/2 font-mono text-[9px] font-bold text-cyan-600 dark:text-cyan-300 sm:block">
+                            {item.joined}
+                          </span>
+                        </div>
+
+                        <div
+                          className="relative w-1/2 rounded-t-md bg-gradient-to-t from-emerald-600 to-teal-400 transition-all duration-500 group-hover:brightness-110"
+                          style={{
+                            height: `${servedHeight}%`,
+                          }}
+                        >
+                          <span className="absolute -top-5 left-1/2 hidden -translate-x-1/2 font-mono text-[9px] font-bold text-emerald-600 dark:text-emerald-300 sm:block">
+                            {item.served}
+                          </span>
+                        </div>
+                      </div>
+
+                      <span className="mt-2 max-w-full truncate font-mono text-[8px] text-[var(--muted)] sm:text-[10px]">
+                        {item.hour}
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
             </div>
-          ))}
-        </div>
+
+            {/* LEGEND */}
+            <div className="flex flex-wrap items-center justify-center gap-5 border-t border-[var(--border)] pt-4 text-[10px] text-[var(--muted)] sm:text-xs">
+              <div className="flex items-center gap-2">
+                <span className="h-3 w-3 rounded bg-indigo-500" />
+                <span>Visitor Arrivals</span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <span className="h-3 w-3 rounded bg-emerald-500" />
+                <span>Tokens Served</span>
+              </div>
+            </div>
+          </div>
+
+          {/* PRIORITY LOAD */}
+          <div className="min-w-0 overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--card)] p-5 shadow-xl sm:p-6 lg:col-span-5">
+
+            <div className="mb-5 flex min-w-0 items-start justify-between gap-3 border-b border-[var(--border)] pb-4">
+              <div className="min-w-0">
+                <h2 className="truncate text-sm font-bold uppercase tracking-wider text-[var(--foreground)]">
+                  Priority vs Standard Load
+                </h2>
+
+                <p className="mt-1 text-[10px] text-[var(--muted)] sm:text-xs">
+                  VIP priority traffic ratio
+                </p>
+              </div>
+
+              <span className="shrink-0 font-mono text-[10px] text-amber-500 sm:text-xs">
+                {analytics.priorityPercentage}% VIP
+              </span>
+            </div>
+
+            <div className="space-y-5">
+
+              {/* RATIO BAR */}
+              <div className="overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card-soft)]">
+                <div className="flex h-7 w-full">
+
+                  <div
+                    className="flex min-w-0 items-center justify-center bg-gradient-to-r from-amber-400 to-orange-500 px-1 text-[9px] font-bold text-slate-950 transition-all duration-700"
+                    style={{
+                      width: `${priorityBarPercentage}%`,
+                    }}
+                  >
+                    <span className="truncate">
+                      {analytics.priorityPercentage > 15
+                        ? `${analytics.priorityPercentage}% VIP`
+                        : ''}
+                    </span>
+                  </div>
+
+                  <div
+                    className="flex min-w-0 items-center justify-center bg-gradient-to-r from-blue-600 to-indigo-600 px-1 text-[9px] font-bold text-white transition-all duration-700"
+                    style={{
+                      width: `${standardBarPercentage}%`,
+                    }}
+                  >
+                    <span className="truncate">
+                      {100 - analytics.priorityPercentage}% Standard
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* LOAD CARDS */}
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+
+                <div className="min-w-0 rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4">
+                  <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase text-amber-600 dark:text-amber-300">
+                    <Zap className="h-3 w-3" />
+                    Priority VIP
+                  </span>
+
+                  <p className="mt-2 font-mono text-2xl font-black text-[var(--foreground)]">
+                    {analytics.priorityCount}
+                  </p>
+
+                  <p className="mt-1 text-[10px] text-[var(--muted)]">
+                    Avg turnaround ~4 mins
+                  </p>
+                </div>
+
+                <div className="min-w-0 rounded-2xl border border-blue-500/20 bg-blue-500/5 p-4">
+                  <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase text-blue-600 dark:text-blue-300">
+                    <Users className="h-3 w-3" />
+                    Standard Lane
+                  </span>
+
+                  <p className="mt-2 font-mono text-2xl font-black text-[var(--foreground)]">
+                    {analytics.normalCount}
+                  </p>
+
+                  <p className="mt-1 text-[10px] text-[var(--muted)]">
+                    Avg turnaround ~11 mins
+                  </p>
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-[var(--border)] bg-[var(--card-soft)] p-3">
+                <p className="text-[11px] leading-relaxed text-[var(--muted)]">
+                  Priority tokens are prioritized at desk dispatching while
+                  maintaining fair distribution for standard walk-ins.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* =====================================================
+            SERVICE BREAKDOWN
+        ====================================================== */}
+        <section className="min-w-0 overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--card)] p-5 shadow-xl sm:p-6">
+
+          <div className="mb-5 flex min-w-0 flex-col gap-2 border-b border-[var(--border)] pb-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
+              <h2 className="flex min-w-0 items-center gap-2 text-sm font-bold uppercase tracking-wider text-[var(--foreground)]">
+                <Layers className="h-4 w-4 shrink-0 text-cyan-500" />
+
+                <span className="truncate">
+                  Service-Wise Distribution & Demand
+                </span>
+              </h2>
+
+              <p className="mt-1 text-[10px] text-[var(--muted)] sm:text-xs">
+                Volume and average handling duration by category
+              </p>
+            </div>
+
+            <span className="shrink-0 text-[10px] text-[var(--muted)] sm:text-xs">
+              {services.length} Service Categories
+            </span>
+          </div>
+
+          <div className="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+
+            {analytics.serviceDistribution.map((srv) => (
+              <div
+                key={srv.serviceId}
+                className="min-w-0 rounded-2xl border border-[var(--border)] bg-[var(--card-soft)] p-4 transition-all hover:border-blue-300 hover:shadow-md"
+              >
+                <div className="flex min-w-0 items-center justify-between gap-3">
+                  <h3 className="min-w-0 truncate text-xs font-bold text-[var(--foreground)]">
+                    {srv.serviceName}
+                  </h3>
+
+                  <span className="shrink-0 font-mono text-[10px] font-black text-cyan-500">
+                    {srv.count} Tokens
+                  </span>
+                </div>
+
+                <div className="mt-4 space-y-1.5">
+                  <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--card)]">
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-cyan-400 transition-all duration-500"
+                      style={{
+                        width: `${Math.max(
+                          5,
+                          Math.min(100, srv.percentage)
+                        )}%`,
+                      }}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between gap-2 font-mono text-[10px] text-[var(--muted)]">
+                    <span>{srv.percentage}% of total</span>
+
+                    <span>
+                      ~{srv.avgWaitMinutes}m avg wait
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            {analytics.serviceDistribution.length === 0 && (
+              <div className="col-span-full rounded-2xl border border-dashed border-[var(--border)] p-10 text-center">
+                <Layers className="mx-auto mb-2 h-7 w-7 text-[var(--muted)]" />
+
+                <p className="text-sm font-bold text-[var(--foreground)]">
+                  No service data available
+                </p>
+
+                <p className="mt-1 text-xs text-[var(--muted)]">
+                  Queue activity will appear here once customers are added.
+                </p>
+              </div>
+            )}
+          </div>
+        </section>
       </div>
     </div>
   );
