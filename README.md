@@ -13,6 +13,7 @@ It also includes AI-assisted queue insights and analytics to help identify conge
 ## 🚀 Key Features
 
 ### 🎟️ Digital Queue Management
+
 - Digital token generation
 - Customer queue registration
 - Real-time queue positioning
@@ -21,6 +22,7 @@ It also includes AI-assisted queue insights and analytics to help identify conge
 - Standard and priority queue handling
 
 ### 🏢 Multi-Counter Staff Dispatch
+
 - Multiple service counters
 - Counter-specific token assignment
 - Staff/operator assignment
@@ -29,6 +31,7 @@ It also includes AI-assisted queue insights and analytics to help identify conge
 - Complete, skip, and recall queue tokens
 
 ### 📺 Live Queue Display
+
 - Real-time public queue display
 - Currently serving token visibility
 - Counter-wise status
@@ -38,6 +41,7 @@ It also includes AI-assisted queue insights and analytics to help identify conge
 - Sound notifications for token calls
 
 ### 🤖 AI Queue Intelligence
+
 - Real-time congestion monitoring
 - Queue clearance estimation
 - Operational recommendations
@@ -47,6 +51,7 @@ It also includes AI-assisted queue insights and analytics to help identify conge
 - Traffic surge simulation
 
 ### 📊 Analytics & Reporting
+
 - Total customers served
 - Average waiting time
 - Average service time
@@ -59,6 +64,7 @@ It also includes AI-assisted queue insights and analytics to help identify conge
 - Raw JSON export
 
 ### 🌗 Modern UI
+
 - Light and dark mode
 - Responsive layouts
 - Mobile-friendly controls
@@ -73,59 +79,27 @@ It also includes AI-assisted queue insights and analytics to help identify conge
 
 ```text
 Customer
-   │
-   ▼
+   |
+   v
 Join Queue
-   │
-   ▼
+   |
+   v
 Token Generated
-   │
-   ▼
+   |
+   v
 Queue Position + Wait Estimate
-   │
-   ▼
+   |
+   v
 AI Queue Analysis
-   │
-   ▼
+   |
+   v
 Staff Counter Dispatch
-   │
-   ▼
+   |
+   v
 Token Called
-   │
-   ▼
+   |
+   v
 Service Completed / Skipped
-   │
-   ▼
+   |
+   v
 Analytics Updated
----
-
-
-## 📸 Screenshots
-## 📸 Screenshots
-
-### 🏠 Overview
-
-![SmartQueue Overview](docs/screenshots/Screenshot%202026-08-30%20144842.png)
-
-### 📺 Live Queue
-
-![SmartQueue Live Queue](docs/screenshots/Screenshot%202026-08-30%20144849.png)
-
-### 🏢 Admin Dashboard
-
-![SmartQueue Admin Dashboard](docs/screenshots/Screenshot%202026-08-30%20144855.png)
-
-### 🤖 AI Insights
-
-![SmartQueue AI Insights](docs/screenshots/Screenshot%202026-08-30%20144901.png)
-
-### 📊 Analytics
-
-![SmartQueue Analytics](docs/screenshots/Screenshot%202026-08-30%20144908.png)
-
-### 🌗 Theme / Responsive View
-
-![SmartQueue Theme](docs/screenshots/Screenshot%202026-08-30%20144915.png)
-
-
----
