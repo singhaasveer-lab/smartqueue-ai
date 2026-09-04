@@ -4,9 +4,24 @@
 
 SmartQueue AI is a modern digital queue management system designed to replace traditional waiting lines with a smarter, real-time experience.
 
-The platform allows customers to join queues digitally, receive token assignments, monitor estimated waiting times, and track queue progress. Staff can manage multiple service counters, dispatch customers, prioritize urgent requests, and monitor live operations through a centralized dashboard.
+Customers can join queues digitally, receive token assignments, monitor estimated waiting times, and track their queue progress. Staff can manage multiple service counters, dispatch customers, prioritize urgent requests, and monitor live operations through a centralized dashboard.
 
-It also includes AI-assisted queue insights and analytics to help identify congestion, bottlenecks, staffing requirements, and overall service performance.
+The system also provides AI-assisted queue insights and analytics to help identify congestion, bottlenecks, staffing requirements, and overall service performance.
+
+---
+
+## ✨ Highlights
+
+- 🎟️ Digital token generation and queue registration
+- ⏱️ Real-time queue position and waiting-time estimation
+- 🏢 Multi-counter staff management
+- 📺 Live public queue display
+- 🤖 AI-powered queue intelligence
+- 📊 Operational analytics and reporting
+- 🚦 Priority queue handling
+- 🌗 Responsive light and dark UI
+- 📤 CSV and JSON data export
+- 🔊 Token-call announcements and sound notifications
 
 ---
 
@@ -79,27 +94,27 @@ It also includes AI-assisted queue insights and analytics to help identify conge
 
 ```text
 Customer
-   |
-   v
+   │
+   ▼
 Join Queue
-   |
-   v
+   │
+   ▼
 Token Generated
-   |
-   v
+   │
+   ▼
 Queue Position + Wait Estimate
-   |
-   v
+   │
+   ▼
 AI Queue Analysis
-   |
-   v
+   │
+   ▼
 Staff Counter Dispatch
-   |
-   v
+   │
+   ▼
 Token Called
-   |
-   v
+   │
+   ▼
 Service Completed / Skipped
-   |
-   v
+   │
+   ▼
 Analytics Updated
