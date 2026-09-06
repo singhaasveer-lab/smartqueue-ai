@@ -4,9 +4,9 @@
 
 SmartQueue AI is a modern digital queue management system designed to replace traditional waiting lines with a smarter, real-time experience.
 
-Customers can join queues digitally, receive token assignments, monitor estimated waiting times, and track their queue progress. Staff can manage multiple service counters, dispatch customers, prioritize urgent requests, and monitor live operations through a centralized dashboard.
+Customers can join queues digitally, receive token assignments, monitor estimated waiting times, and track queue progress. Staff can manage multiple service counters, dispatch customers, prioritize urgent requests, and monitor live operations through a centralized dashboard.
 
-The system also provides AI-assisted queue insights and analytics to help identify congestion, bottlenecks, staffing requirements, and overall service performance.
+SmartQueue also provides AI-assisted queue intelligence and operational analytics to help identify congestion, bottlenecks, traffic patterns, and service performance.
 
 ---
 
@@ -22,6 +22,23 @@ The system also provides AI-assisted queue insights and analytics to help identi
 - 🌗 Responsive light and dark UI
 - 📤 CSV and JSON data export
 - 🔊 Token-call announcements and sound notifications
+
+---
+
+## 📸 Project Preview
+
+The interface is designed around three core experiences:
+
+**Customer Experience**  
+Join a queue, receive a token, and track your position and estimated waiting time.
+
+**Staff Dashboard**  
+Manage service counters, call the next customer, handle priority requests, and update token status.
+
+**Live Queue Display**  
+Show currently serving tokens, counter information, recent activity, and queue announcements on a public display.
+
+Screenshots are available in [`docs/screenshots`](docs/screenshots).
 
 ---
 
@@ -42,7 +59,7 @@ The system also provides AI-assisted queue insights and analytics to help identi
 - Counter-specific token assignment
 - Staff/operator assignment
 - Open and close service desks
-- Call the next customer directly from the Admin Dashboard
+- Call the next customer from the admin dashboard
 - Complete, skip, and recall queue tokens
 
 ### 📺 Live Queue Display
@@ -62,7 +79,7 @@ The system also provides AI-assisted queue insights and analytics to help identi
 - Operational recommendations
 - Bottleneck detection
 - Priority traffic analysis
-- Natural-language AI assistant
+- Natural-language AI assistance
 - Traffic surge simulation
 
 ### 📊 Analytics & Reporting
