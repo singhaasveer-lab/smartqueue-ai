@@ -27,18 +27,25 @@ SmartQueue also provides AI-assisted queue intelligence and operational analytic
 
 ## 📸 Project Preview
 
-The interface is designed around three core experiences:
+SmartQueue AI is built around three core experiences:
 
-**Customer Experience**  
-Join a queue, receive a token, and track your position and estimated waiting time.
+### 🏠 Overview Dashboard
 
-**Staff Dashboard**  
-Manage service counters, call the next customer, handle priority requests, and update token status.
+The main dashboard gives users a quick view of the queue, waiting times, served customers, and available service desks.
 
-**Live Queue Display**  
-Show currently serving tokens, counter information, recent activity, and queue announcements on a public display.
+![SmartQueue AI Overview](docs/screenshots/Screenshot%202026-08-30%20144842.png)
 
-Screenshots are available in [`docs/screenshots`](docs/screenshots).
+### 👨‍💼 Admin & Staff Dispatch
+
+The staff dashboard provides centralized control over service counters, customer dispatch, queue status, and priority handling.
+
+![SmartQueue AI Admin Dashboard](docs/screenshots/Screenshot%202026-08-30%20144901.png)
+
+### 📺 Live Queue Display
+
+The public display shows currently serving tokens, counter information, waiting customers, and live queue activity.
+
+![SmartQueue AI Live Queue](docs/screenshots/Screenshot%202026-08-30%20144855.png)
 
 ---
 
